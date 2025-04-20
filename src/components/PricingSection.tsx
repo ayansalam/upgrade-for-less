@@ -1,8 +1,11 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PricingCard from "./PricingCard";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 // Example: Monthly plan price
 const MONTHLY_PRICE = 29;
@@ -33,6 +36,19 @@ const DISCOUNTS = [
 
 const PricingSection = () => {
   const [selectedDiscount, setSelectedDiscount] = useState<"none" | "8weeks" | "52weeks">("none");
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Check if user is logged in
+  useState(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user);
+    };
+    
+    checkUser();
+  });
 
   const handleDiscountChange = (key: string) => {
     setSelectedDiscount(key as "none" | "8weeks" | "52weeks");
@@ -47,6 +63,31 @@ const PricingSection = () => {
   };
 
   const selectedOption = DISCOUNTS.find((d) => d.key === selectedDiscount);
+
+  const handleStartFreeTrial = () => {
+    if (!user) {
+      // If not logged in, redirect to auth page
+      navigate("/auth");
+      toast({
+        title: "Login required",
+        description: "Please log in or sign up to start your free trial.",
+      });
+    } else {
+      // If logged in, show success message
+      toast({
+        title: "Free trial started!",
+        description: "Your 14-day free trial has been activated.",
+      });
+      // In a real app, this would also call an API to start the trial
+    }
+  };
+
+  const handleScheduleDemo = () => {
+    toast({
+      title: "Demo scheduled!",
+      description: "Thank you for your interest. Our team will contact you soon to schedule a demo.",
+    });
+  };
 
   return (
     <section id="pricing" className="py-20 bg-gray-50">
@@ -101,7 +142,20 @@ const PricingSection = () => {
               ? "Start Free Trial"
               : `Start Free Trial (with ${selectedOption?.label})`
           }
+          // Add onClick handler to button
+          onButtonClick={handleStartFreeTrial}
         />
+
+        {/* Demo CTA */}
+        <div className="text-center mt-12">
+          <p className="text-lg mb-4">Not ready to commit? See our product in action first.</p>
+          <button 
+            onClick={handleScheduleDemo}
+            className="text-brand font-medium hover:underline"
+          >
+            Schedule a Live Demo →
+          </button>
+        </div>
       </div>
     </section>
   );

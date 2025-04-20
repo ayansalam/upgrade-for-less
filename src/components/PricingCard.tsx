@@ -13,6 +13,7 @@ interface PricingCardProps {
   features: string[];
   popular?: boolean;
   buttonText?: string;
+  onButtonClick?: () => void;
 }
 
 const PricingCard = ({
@@ -24,6 +25,7 @@ const PricingCard = ({
   features,
   popular = false,
   buttonText = "Get Started",
+  onButtonClick,
 }: PricingCardProps) => {
   const displayPrice = yearly && yearlyPrice ? yearlyPrice : price;
   const monthlyEquivalent = yearly && yearlyPrice ? Math.round(yearlyPrice / 12) : null;
@@ -58,7 +60,12 @@ const PricingCard = ({
         </ul>
       </CardContent>
       <CardFooter>
-        <Button className={`w-full ${popular ? 'bg-brand hover:bg-brand-dark' : ''}`}>{buttonText}</Button>
+        <Button 
+          className={`w-full ${popular ? 'bg-brand hover:bg-brand-dark' : ''}`}
+          onClick={onButtonClick}
+        >
+          {buttonText}
+        </Button>
       </CardFooter>
     </Card>
   );
