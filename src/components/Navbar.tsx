@@ -1,8 +1,26 @@
-
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user));
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user);
+    });
+    return () => authListener?.subscription.unsubscribe();
+  }, []);
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    setUser(null);
+    navigate("/auth");
+  }
+
   return (
     <nav className="border-b bg-white/80 backdrop-blur-md fixed w-full z-10">
       <div className="container mx-auto flex items-center justify-between py-4">
@@ -26,12 +44,24 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm">
-            Log in
-          </Button>
-          <Button size="sm">
-            Start Free Trial
-          </Button>
+          {!user && (
+            <>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/auth">Log in</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link to="/auth">Start Free Trial</Link>
+              </Button>
+            </>
+          )}
+          {user && (
+            <>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                Log out
+              </Button>
+              <span className="text-sm ml-2">Welcome!</span>
+            </>
+          )}
         </div>
       </div>
     </nav>
