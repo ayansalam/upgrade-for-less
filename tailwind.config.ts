@@ -52,15 +52,6 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				brand: {
-					DEFAULT: '#8B5CF6', // Vivid purple
-					light: '#E5DEFF',  // Soft purple
-					dark: '#6E59A5',   // Dark purple
-				},
-				discount: {
-					DEFAULT: '#F97316', // Bright orange
-					light: '#FEC6A1',   // Soft orange 
-				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
