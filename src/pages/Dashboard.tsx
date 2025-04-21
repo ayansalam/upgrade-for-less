@@ -1,9 +1,9 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, CreditCard, HelpCircle, Home, LineChart, Settings, User } from "lucide-react";
+import { PricingOptimizer } from "@/components/PricingOptimizer";
 
 const Dashboard = () => {
   // Mock user data - in a real app, this would come from a backend
@@ -115,6 +115,10 @@ const Dashboard = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+          <div className="md:col-span-2">
+            <PricingOptimizer />
+          </div>
+          
           {/* Quick Links */}
           <Card>
             <CardHeader>

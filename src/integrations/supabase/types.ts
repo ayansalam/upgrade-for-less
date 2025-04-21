@@ -163,6 +163,36 @@ export type Database = {
           },
         ]
       }
+      user_pricing_inputs: {
+        Row: {
+          business_goal: string
+          created_at: string
+          id: string
+          monthly_price: number
+          plan_name: string
+          suggested_pricing: string | null
+          user_id: string
+        }
+        Insert: {
+          business_goal: string
+          created_at?: string
+          id?: string
+          monthly_price: number
+          plan_name: string
+          suggested_pricing?: string | null
+          user_id: string
+        }
+        Update: {
+          business_goal?: string
+          created_at?: string
+          id?: string
+          monthly_price?: number
+          plan_name?: string
+          suggested_pricing?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
