@@ -32,11 +32,27 @@ export function PricingOptimizer() {
   const onSubmit = async (data: PricingFormValues) => {
     try {
       setIsLoading(true);
+      
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // If no user is authenticated, show a warning
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to submit pricing information.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
       const { error } = await supabase.from("user_pricing_inputs").insert([
         {
           monthly_price: data.monthlyPrice,
           plan_name: data.planName,
           business_goal: data.businessGoal,
+          user_id: user.id,
         },
       ]);
 
