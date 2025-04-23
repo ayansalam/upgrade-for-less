@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import ProfileSettings from "@/components/settings/ProfileSettings";
@@ -12,7 +11,6 @@ import PreferenceSettings from "@/components/settings/PreferenceSettings";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, User, Bell, CreditCard, Package, Activity, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const AccountSettings = () => {
