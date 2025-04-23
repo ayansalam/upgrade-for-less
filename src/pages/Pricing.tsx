@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -97,7 +98,7 @@ const Pricing = () => {
               className="w-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-medium py-3 rounded-lg transition-colors"
               asChild
             >
-              <Link to="/auth">{getButtonText()}</Link>
+              <Link to="/auth?tab=signup">{getButtonText()}</Link>
             </Button>
           </CardFooter>
         </Card>
