@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -30,9 +31,12 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold">Dashboard</h1>
             <p className="text-gray-500">Welcome back, {userData.name}</p>
           </div>
-          <div className="mt-4 md:mt-0">
-            <Button asChild variant="outline" className="mr-2">
+          <div className="mt-4 md:mt-0 flex flex-wrap gap-2">
+            <Button asChild variant="outline">
               <Link to="/support"><HelpCircle className="h-4 w-4 mr-2" /> Get Help</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/account-settings"><Settings className="h-4 w-4 mr-2" /> Account Settings</Link>
             </Button>
             <Button asChild>
               <Link to="/"><Home className="h-4 w-4 mr-2" /> Home</Link>
@@ -76,8 +80,10 @@ const Dashboard = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button variant="outline" className="w-full">
-                Manage Subscription
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/account-settings?tab=subscription">
+                  Manage Subscription
+                </Link>
               </Button>
             </CardFooter>
           </Card>
@@ -106,7 +112,7 @@ const Dashboard = () => {
             </CardContent>
             <CardFooter>
               <Button asChild variant="outline" className="w-full">
-                <Link to="/support">
+                <Link to="/account-settings?tab=payment">
                   <CreditCard className="h-4 w-4 mr-2" /> Update Payment Method
                 </Link>
               </Button>
@@ -126,7 +132,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <Button asChild variant="ghost" className="w-full justify-start">
-                <Link to="/settings">
+                <Link to="/account-settings">
                   <Settings className="h-4 w-4 mr-2" /> Account Settings
                 </Link>
               </Button>
@@ -136,12 +142,12 @@ const Dashboard = () => {
                 </Link>
               </Button>
               <Button asChild variant="ghost" className="w-full justify-start">
-                <Link to="/billing">
+                <Link to="/account-settings?tab=payment">
                   <CreditCard className="h-4 w-4 mr-2" /> Billing History
                 </Link>
               </Button>
               <Button asChild variant="ghost" className="w-full justify-start">
-                <Link to="/usage">
+                <Link to="/account-settings?tab=usage">
                   <LineChart className="h-4 w-4 mr-2" /> Usage Analytics
                 </Link>
               </Button>
