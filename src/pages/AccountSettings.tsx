@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
@@ -22,22 +23,50 @@ const AccountSettings = () => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
+      try {
+        // Get session instead of user to check authentication status properly
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          toast({
+            title: "Authentication required",
+            description: "Please log in to view your account settings.",
+            variant: "destructive",
+          });
+          navigate("/auth");
+          return;
+        }
+        
+        setUser(session.user);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error checking authentication:", error);
         toast({
-          title: "Authentication required",
-          description: "Please log in to view your account settings.",
+          title: "Authentication error",
+          description: "There was a problem verifying your authentication status.",
           variant: "destructive",
         });
         navigate("/auth");
-        return;
       }
-      setUser(data.user);
-      setIsLoading(false);
     };
 
     checkUser();
   }, [navigate, toast]);
+
+  // For demo purposes only - this simulates a successful login
+  // Remove this in production when real authentication is implemented
+  useEffect(() => {
+    // This is just for demonstration - providing a mock user if authentication isn't set up
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        console.log("Demo mode: Setting mock user");
+        setUser({ id: "demo-user-id", email: "demo@example.com" });
+        setIsLoading(false);
+      }
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   if (isLoading) {
     return (
