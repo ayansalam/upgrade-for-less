@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 interface ProfileFormValues {
   firstName: string;
@@ -25,6 +26,7 @@ const ProfileSettings = ({ user }) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [demoMode, setDemoMode] = useState(false);
   
   const form = useForm<ProfileFormValues>({
     defaultValues: {
@@ -37,6 +39,28 @@ const ProfileSettings = ({ user }) => {
   useEffect(() => {
     const fetchProfileData = async () => {
       setIsLoading(true);
+      
+      // Check if we're in demo mode by examining the user ID format
+      if (user.id === "demo-user-id") {
+        setDemoMode(true);
+        // Set mock profile data for demo mode
+        const mockProfile = {
+          id: user.id,
+          first_name: "Demo",
+          last_name: "User",
+          email: user.email || "demo@example.com",
+        };
+        
+        setProfileData(mockProfile);
+        form.reset({
+          firstName: mockProfile.first_name,
+          lastName: mockProfile.last_name,
+          email: mockProfile.email,
+        });
+        setIsLoading(false);
+        return;
+      }
+      
       try {
         const { data, error } = await supabase
           .from("profiles")
@@ -75,6 +99,17 @@ const ProfileSettings = ({ user }) => {
   
   const onSubmit = async (formData: ProfileFormValues) => {
     setIsLoading(true);
+    
+    if (demoMode) {
+      // In demo mode, just show a success message without making API calls
+      toast({
+        title: "Demo Mode",
+        description: "Profile would be updated in a real account.",
+      });
+      setIsLoading(false);
+      return;
+    }
+    
     try {
       const { error } = await supabase
         .from("profiles")
@@ -110,6 +145,15 @@ const ProfileSettings = ({ user }) => {
         <h2 className="text-2xl font-bold">Profile Information</h2>
         <p className="text-muted-foreground">Update your personal information.</p>
       </div>
+      
+      {demoMode && (
+        <Alert className="bg-yellow-50 border-yellow-200">
+          <AlertTitle className="text-yellow-800">Demo Mode</AlertTitle>
+          <AlertDescription className="text-yellow-700">
+            You're viewing profile settings in demo mode. Changes won't be saved.
+          </AlertDescription>
+        </Alert>
+      )}
       
       <div className="flex items-center space-x-4">
         <Avatar className="h-20 w-20">
