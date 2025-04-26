@@ -12,61 +12,51 @@ import PreferenceSettings from "@/components/settings/PreferenceSettings";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, User, Bell, CreditCard, Package, Activity, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const AccountSettings = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("profile");
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
+  const [demoMode, setDemoMode] = useState(false);
 
   useEffect(() => {
+    // Extract tab from URL if present
+    const urlParams = new URLSearchParams(location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+    
     const checkUser = async () => {
       try {
-        // Get session instead of user to check authentication status properly
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (!session) {
-          toast({
-            title: "Authentication required",
-            description: "Please log in to view your account settings.",
-            variant: "destructive",
-          });
-          navigate("/auth");
+        if (session?.user) {
+          setUser(session.user);
+          setIsLoading(false);
           return;
         }
         
-        setUser(session.user);
+        // If no authenticated session, enter demo mode instead of redirecting
+        console.log("No authenticated session, entering demo mode");
+        setDemoMode(true);
+        setUser({ id: "demo-user-id", email: "demo@example.com" });
         setIsLoading(false);
       } catch (error) {
         console.error("Error checking authentication:", error);
-        toast({
-          title: "Authentication error",
-          description: "There was a problem verifying your authentication status.",
-          variant: "destructive",
-        });
-        navigate("/auth");
+        // Enter demo mode instead of redirecting
+        setDemoMode(true);
+        setUser({ id: "demo-user-id", email: "demo@example.com" });
+        setIsLoading(false);
       }
     };
 
     checkUser();
-  }, [navigate, toast]);
-
-  // For demo purposes only - this simulates a successful login
-  // Remove this in production when real authentication is implemented
-  useEffect(() => {
-    // This is just for demonstration - providing a mock user if authentication isn't set up
-    const timer = setTimeout(() => {
-      if (isLoading) {
-        console.log("Demo mode: Setting mock user");
-        setUser({ id: "demo-user-id", email: "demo@example.com" });
-        setIsLoading(false);
-      }
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, [isLoading]);
+  }, [location.search]);
 
   if (isLoading) {
     return (
@@ -78,6 +68,20 @@ const AccountSettings = () => {
 
   return (
     <div className="container mx-auto py-10 px-4 md:px-0">
+      {demoMode && (
+        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p className="text-yellow-800">
+            <strong>Demo Mode:</strong> You're viewing account settings in demo mode. 
+            <button 
+              onClick={() => navigate('/auth')} 
+              className="ml-2 text-blue-600 hover:underline"
+            >
+              Sign in
+            </button> for full access.
+          </p>
+        </div>
+      )}
+      
       <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
       
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-6">
