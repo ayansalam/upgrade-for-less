@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Shield, User, Bell, CreditCard, Package, Activity, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const AccountSettings = () => {
   const { toast } = useToast();
@@ -22,6 +23,7 @@ const AccountSettings = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [demoMode, setDemoMode] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Extract tab from URL if present
@@ -85,34 +87,34 @@ const AccountSettings = () => {
       <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
       
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid grid-cols-2 md:grid-cols-7 gap-2">
+        <TabsList className={isMobile ? "flex flex-wrap gap-2 justify-center" : "grid grid-cols-2 md:grid-cols-7 gap-2"}>
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />
-            <span className="hidden md:inline">Profile</span>
+            <span className={isMobile ? "inline" : "hidden md:inline"}>Profile</span>
           </TabsTrigger>
           <TabsTrigger value="security" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
-            <span className="hidden md:inline">Security</span>
+            <span className={isMobile ? "inline" : "hidden md:inline"}>Security</span>
           </TabsTrigger>
           <TabsTrigger value="subscription" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
-            <span className="hidden md:inline">Subscription</span>
+            <span className={isMobile ? "inline" : "hidden md:inline"}>Subscription</span>
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-2">
             <Bell className="h-4 w-4" />
-            <span className="hidden md:inline">Notifications</span>
+            <span className={isMobile ? "inline" : "hidden md:inline"}>Notifications</span>
           </TabsTrigger>
           <TabsTrigger value="payment" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
-            <span className="hidden md:inline">Payment</span>
+            <span className={isMobile ? "inline" : "hidden md:inline"}>Payment</span>
           </TabsTrigger>
           <TabsTrigger value="usage" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
-            <span className="hidden md:inline">Usage</span>
+            <span className={isMobile ? "inline" : "hidden md:inline"}>Usage</span>
           </TabsTrigger>
           <TabsTrigger value="preferences" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
-            <span className="hidden md:inline">Preferences</span>
+            <span className={isMobile ? "inline" : "hidden md:inline"}>Preferences</span>
           </TabsTrigger>
         </TabsList>
         
