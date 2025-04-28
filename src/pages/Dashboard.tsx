@@ -1,27 +1,16 @@
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Link } from "react-router-dom";
-import { ArrowRight, Calendar, CreditCard, HelpCircle, Home, LineChart, Settings, User } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PricingOptimizer } from "@/components/PricingOptimizer";
+import { LineChart, HelpCircle, Calendar, User, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Dashboard = () => {
   // Mock user data - in a real app, this would come from a backend
   const userData = {
     name: "John Doe",
     plan: "Premium",
-    discount: "30% off for 52 weeks",
-    startDate: "January 15, 2025",
-    nextPayment: "May 15, 2025",
-    paymentAmount: 34.30, // 30% off the $49 base price
-    daysRemaining: 48,
-    totalDays: 52 * 7, // 52 weeks in days
   };
-
-  // Calculate progress for discount period
-  const daysUsed = userData.totalDays - userData.daysRemaining;
-  const progressPercentage = (daysUsed / userData.totalDays) * 100;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -38,142 +27,84 @@ const Dashboard = () => {
             <Button asChild variant="outline">
               <Link to="/account-settings"><Settings className="h-4 w-4 mr-2" /> Account Settings</Link>
             </Button>
-            <Button asChild>
-              <Link to="/"><Home className="h-4 w-4 mr-2" /> Home</Link>
-            </Button>
           </div>
         </div>
+
+        {/* Welcome Card */}
+        <Card className="mb-8 border-primary/20 bg-primary/5">
+          <CardContent className="flex items-center pt-6">
+            <div className="bg-primary/10 p-3 rounded-full mr-4">
+              <LineChart className="h-8 w-8 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold mb-1">🎯 Welcome to the Pricing Optimizer!</h2>
+              <p className="text-muted-foreground">
+                Ready to optimize your pricing? Submit your current plan details below, and we'll suggest winning strategies!
+              </p>
+            </div>
+          </CardContent>
+        </Card>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Subscription Card */}
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Your Subscription</CardTitle>
-              <CardDescription>Current plan and discount details</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Plan</p>
-                  <p className="font-medium">{userData.plan}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Discount Applied</p>
-                  <p className="font-medium text-green-600">{userData.discount}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Start Date</p>
-                  <p className="font-medium">{userData.startDate}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Next Payment</p>
-                  <p className="font-medium">{userData.nextPayment}</p>
-                </div>
-              </div>
-              
-              <div className="mt-6">
-                <div className="flex justify-between items-center mb-2">
-                  <p className="font-medium">Discount Period</p>
-                  <p className="text-sm text-gray-500">{userData.daysRemaining} days remaining</p>
-                </div>
-                <Progress value={progressPercentage} className="h-2" />
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button asChild variant="outline" className="w-full">
-                <Link to="/account-settings?tab=subscription">
-                  Manage Subscription
-                </Link>
-              </Button>
-            </CardFooter>
-          </Card>
-          
-          {/* Payment Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span>Monthly charge</span>
-                <span className="font-medium">${userData.paymentAmount.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center text-green-600">
-                <span>Savings</span>
-                <span className="font-medium">$14.70/month</span>
-              </div>
-              <div className="pt-4 border-t">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Next payment</span>
-                  <span className="font-medium">${userData.paymentAmount.toFixed(2)}</span>
-                </div>
-                <p className="text-sm text-gray-500 mt-1">On {userData.nextPayment}</p>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button asChild variant="outline" className="w-full">
-                <Link to="/account-settings?tab=payment">
-                  <CreditCard className="h-4 w-4 mr-2" /> Update Payment Method
-                </Link>
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
+        {/* Main Content Area */}
+        <PricingOptimizer />
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-          <div className="md:col-span-2">
-            <PricingOptimizer />
-          </div>
-          
-          {/* Quick Links */}
+        {/* Quick Links */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
           <Card>
-            <CardHeader>
-              <CardTitle>Quick Links</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Account</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <Button asChild variant="ghost" className="w-full justify-start">
-                <Link to="/account-settings">
-                  <Settings className="h-4 w-4 mr-2" /> Account Settings
-                </Link>
-              </Button>
-              <Button asChild variant="ghost" className="w-full justify-start">
-                <Link to="/support">
-                  <HelpCircle className="h-4 w-4 mr-2" /> Get Support
-                </Link>
-              </Button>
-              <Button asChild variant="ghost" className="w-full justify-start">
-                <Link to="/account-settings?tab=payment">
-                  <CreditCard className="h-4 w-4 mr-2" /> Billing History
-                </Link>
-              </Button>
-              <Button asChild variant="ghost" className="w-full justify-start">
-                <Link to="/account-settings?tab=usage">
-                  <LineChart className="h-4 w-4 mr-2" /> Usage Analytics
-                </Link>
-              </Button>
-              <Button asChild variant="ghost" className="w-full justify-start">
-                <Link to="/calendar">
-                  <Calendar className="h-4 w-4 mr-2" /> Schedule Demo
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-          
-          {/* Special Offers / Upsell */}
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Maximize Your Savings</CardTitle>
-              <CardDescription>Opportunities to get more value from your subscription</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-primary/5 p-4 rounded-lg border border-primary/20">
-                <h3 className="font-semibold mb-2">Recommend UpgradeForLess to a friend</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  When they sign up, you both get an additional 5% off your subscription for 3 months.
-                </p>
-                <Button variant="secondary" size="sm">
-                  Invite Friends <ArrowRight className="h-4 w-4 ml-2" />
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                <Button variant="ghost" className="w-full justify-start" size="sm" asChild>
+                  <Link to="/account-settings"><User className="h-4 w-4 mr-2" /> Profile</Link>
                 </Button>
+                <Button variant="ghost" className="w-full justify-start" size="sm" asChild>
+                  <Link to="/account-settings?tab=subscription">
+                    <LineChart className="h-4 w-4 mr-2" /> Subscription
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Support</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                <Button variant="ghost" className="w-full justify-start" size="sm" asChild>
+                  <Link to="/support"><HelpCircle className="h-4 w-4 mr-2" /> Help Center</Link>
+                </Button>
+                <Button variant="ghost" className="w-full justify-start" size="sm" asChild>
+                  <Link to="/calendar"><Calendar className="h-4 w-4 mr-2" /> Schedule Demo</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="md:col-span-2">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Tips</CardTitle>
+              <CardDescription>
+                Get the most out of our pricing optimizer
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2 text-sm">
+                <p className="flex items-center">
+                  <span className="bg-primary/10 text-primary p-1 rounded-full text-xs mr-2">1</span>
+                  <span>Start with your current pricing to get the most relevant recommendations.</span>
+                </p>
+                <p className="flex items-center">
+                  <span className="bg-primary/10 text-primary p-1 rounded-full text-xs mr-2">2</span>
+                  <span>Be specific about your target audience to receive tailored suggestions.</span>
+                </p>
+                <p className="flex items-center">
+                  <span className="bg-primary/10 text-primary p-1 rounded-full text-xs mr-2">3</span>
+                  <span>Experiment with different business goals to see various optimization strategies.</span>
+                </p>
               </div>
             </CardContent>
           </Card>
