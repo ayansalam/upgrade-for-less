@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import ProfileSettings from "@/components/settings/ProfileSettings";
 import SecuritySettings from "@/components/settings/SecuritySettings";
 import SubscriptionSettings from "@/components/settings/SubscriptionSettings";
@@ -96,21 +97,27 @@ const AccountSettings = () => {
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-6">
         {isMobile ? (
           <div className="mb-6">
-            <Carousel opts={{ align: "start" }} className="w-full">
-              <CarouselContent className="-ml-1">
-                {tabs.map((tab) => (
-                  <CarouselItem key={tab.value} className="pl-1 basis-1/3">
-                    <TabsTrigger
-                      value={tab.value}
-                      className="w-full flex flex-col items-center gap-1 p-2"
-                    >
-                      {tab.icon}
-                      <span className="text-xs">{tab.label}</span>
-                    </TabsTrigger>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
+            <TabsList className="w-full flex overflow-auto py-2">
+              <Carousel opts={{ align: "start" }} className="w-full">
+                <CarouselContent className="-ml-1">
+                  {tabs.map((tab) => (
+                    <CarouselItem key={tab.value} className="pl-1 basis-1/3">
+                      <TabsTrigger
+                        value={tab.value}
+                        className="w-full flex flex-col items-center gap-1 p-2"
+                      >
+                        {tab.icon}
+                        <span className="text-xs">{tab.label}</span>
+                      </TabsTrigger>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="flex justify-end gap-2 mt-2">
+                  <CarouselPrevious className="static translate-y-0" />
+                  <CarouselNext className="static translate-y-0" />
+                </div>
+              </Carousel>
+            </TabsList>
           </div>
         ) : (
           <TabsList className="grid grid-cols-7 gap-2">
