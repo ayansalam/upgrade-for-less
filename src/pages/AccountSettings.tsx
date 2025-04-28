@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import ProfileSettings from "@/components/settings/ProfileSettings";
 import SecuritySettings from "@/components/settings/SecuritySettings";
 import SubscriptionSettings from "@/components/settings/SubscriptionSettings";
@@ -25,8 +25,17 @@ const AccountSettings = () => {
   const [demoMode, setDemoMode] = useState(false);
   const isMobile = useIsMobile();
 
+  const tabs = [
+    { value: "profile", icon: <User className="h-4 w-4" />, label: "Profile" },
+    { value: "security", icon: <Shield className="h-4 w-4" />, label: "Security" },
+    { value: "subscription", icon: <Package className="h-4 w-4" />, label: "Subscription" },
+    { value: "notifications", icon: <Bell className="h-4 w-4" />, label: "Notifications" },
+    { value: "payment", icon: <CreditCard className="h-4 w-4" />, label: "Payment" },
+    { value: "usage", icon: <Activity className="h-4 w-4" />, label: "Usage" },
+    { value: "preferences", icon: <Settings className="h-4 w-4" />, label: "Preferences" },
+  ];
+
   useEffect(() => {
-    // Extract tab from URL if present
     const urlParams = new URLSearchParams(location.search);
     const tabParam = urlParams.get('tab');
     if (tabParam) {
@@ -43,14 +52,12 @@ const AccountSettings = () => {
           return;
         }
         
-        // If no authenticated session, enter demo mode instead of redirecting
         console.log("No authenticated session, entering demo mode");
         setDemoMode(true);
         setUser({ id: "demo-user-id", email: "demo@example.com" });
         setIsLoading(false);
       } catch (error) {
         console.error("Error checking authentication:", error);
-        // Enter demo mode instead of redirecting
         setDemoMode(true);
         setUser({ id: "demo-user-id", email: "demo@example.com" });
         setIsLoading(false);
@@ -87,37 +94,39 @@ const AccountSettings = () => {
       <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
       
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className={isMobile ? "flex flex-wrap gap-2 justify-center" : "grid grid-cols-2 md:grid-cols-7 gap-2"}>
-          <TabsTrigger value="profile" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            <span className={isMobile ? "inline" : "hidden md:inline"}>Profile</span>
-          </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            <span className={isMobile ? "inline" : "hidden md:inline"}>Security</span>
-          </TabsTrigger>
-          <TabsTrigger value="subscription" className="flex items-center gap-2">
-            <Package className="h-4 w-4" />
-            <span className={isMobile ? "inline" : "hidden md:inline"}>Subscription</span>
-          </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
-            <Bell className="h-4 w-4" />
-            <span className={isMobile ? "inline" : "hidden md:inline"}>Notifications</span>
-          </TabsTrigger>
-          <TabsTrigger value="payment" className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4" />
-            <span className={isMobile ? "inline" : "hidden md:inline"}>Payment</span>
-          </TabsTrigger>
-          <TabsTrigger value="usage" className="flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            <span className={isMobile ? "inline" : "hidden md:inline"}>Usage</span>
-          </TabsTrigger>
-          <TabsTrigger value="preferences" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            <span className={isMobile ? "inline" : "hidden md:inline"}>Preferences</span>
-          </TabsTrigger>
-        </TabsList>
-        
+        {isMobile ? (
+          <div className="mb-6">
+            <Carousel opts={{ align: "start" }} className="w-full">
+              <CarouselContent className="-ml-1">
+                {tabs.map((tab) => (
+                  <CarouselItem key={tab.value} className="pl-1 basis-1/3">
+                    <TabsTrigger
+                      value={tab.value}
+                      className="w-full flex flex-col items-center gap-1 p-2"
+                    >
+                      {tab.icon}
+                      <span className="text-xs">{tab.label}</span>
+                    </TabsTrigger>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+          </div>
+        ) : (
+          <TabsList className="grid grid-cols-7 gap-2">
+            {tabs.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="flex items-center gap-2"
+              >
+                {tab.icon}
+                <span className="hidden md:inline">{tab.label}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        )}
+
         <TabsContent value="profile">
           <Card className="p-6">
             <ProfileSettings user={user} />
