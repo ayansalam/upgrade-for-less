@@ -4,9 +4,8 @@ import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
 import { cn } from "@/lib/utils"
-import { CarouselContext } from "./use-carousel"
+import { CarouselContext, type CarouselApi } from "./use-carousel"
 
-type CarouselApi = UseEmblaCarouselType[1]
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
 type CarouselOptions = UseCarouselParameters[0]
 type CarouselPlugin = UseCarouselParameters[1]
