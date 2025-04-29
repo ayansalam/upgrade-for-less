@@ -4,8 +4,8 @@ import type { UseEmblaCarouselType } from "embla-carousel-react"
 
 type CarouselApi = UseEmblaCarouselType[1]
 
-// The actual ref type that comes from embla-carousel
-type EmblaViewportRefType = React.MutableRefObject<HTMLElement | null>
+// Define a more generic type that can work with both embla carousel and React refs
+type EmblaViewportRefType = React.RefObject<HTMLElement | null> | ((instance: HTMLElement | null) => void) | null
 
 type CarouselContextProps = {
   carouselRef: EmblaViewportRefType
