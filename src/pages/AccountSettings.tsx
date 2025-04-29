@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
@@ -15,6 +14,7 @@ import { Shield, User, Bell, CreditCard, Package, Activity, Settings } from "luc
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const AccountSettings = () => {
   const { toast } = useToast();
@@ -97,27 +97,20 @@ const AccountSettings = () => {
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-6">
         {isMobile ? (
           <div className="mb-6">
-            <TabsList className="w-full flex overflow-x-auto scrollbar-hide py-2">
-              <Carousel opts={{ align: "start" }} className="w-full">
-                <CarouselContent className="-ml-1">
-                  {tabs.map((tab) => (
-                    <CarouselItem key={tab.value} className="pl-1 basis-auto min-w-max">
-                      <TabsTrigger
-                        value={tab.value}
-                        className="flex flex-col items-center gap-1 p-2"
-                      >
-                        <span className="flex justify-center">{tab.icon}</span>
-                        <span className="text-xs whitespace-nowrap">{tab.label}</span>
-                      </TabsTrigger>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <div className="flex justify-end gap-2 mt-2">
-                  <CarouselPrevious className="static translate-y-0" />
-                  <CarouselNext className="static translate-y-0" />
-                </div>
-              </Carousel>
-            </TabsList>
+            <ScrollArea className="w-full pb-4">
+              <TabsList className="inline-flex w-auto min-w-full">
+                {tabs.map((tab) => (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="flex items-center gap-2 whitespace-nowrap px-4"
+                  >
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </ScrollArea>
           </div>
         ) : (
           <TabsList className="grid grid-cols-7 gap-2">
