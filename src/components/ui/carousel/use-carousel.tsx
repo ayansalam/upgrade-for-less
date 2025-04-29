@@ -15,6 +15,7 @@ type CarouselContextProps = {
   canScrollPrev: boolean
   canScrollNext: boolean
   orientation?: "horizontal" | "vertical"
+  opts?: any // Add the opts property to match what's being passed in index.tsx
 }
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)

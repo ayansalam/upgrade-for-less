@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
@@ -100,7 +99,7 @@ const Carousel = React.forwardRef<
         value={{
           carouselRef,
           api: api,
-          opts,
+          opts, // This is now properly typed in CarouselContextProps
           orientation:
             orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
           scrollPrev,
