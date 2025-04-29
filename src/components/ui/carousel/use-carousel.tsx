@@ -1,11 +1,14 @@
 
 import * as React from "react"
-import type { UseEmblaCarouselType, EmblaCarouselType } from "embla-carousel-react"
+import type { UseEmblaCarouselType } from "embla-carousel-react"
 
 type CarouselApi = UseEmblaCarouselType[1]
 
+// The actual ref type that comes from embla-carousel
+type EmblaViewportRefType = React.MutableRefObject<HTMLElement | null>
+
 type CarouselContextProps = {
-  carouselRef: React.RefObject<HTMLDivElement>
+  carouselRef: EmblaViewportRefType
   api: CarouselApi | null
   scrollPrev: () => void
   scrollNext: () => void
@@ -26,4 +29,4 @@ export function useCarousel() {
   return context
 }
 
-export { CarouselContext, type CarouselApi }
+export { CarouselContext, type CarouselApi, type EmblaViewportRefType }
