@@ -5,10 +5,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const PreferenceSettings = ({ user }) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const isMobile = useIsMobile();
   const [preferences, setPreferences] = useState({
     theme: "system",
     language: "en",
@@ -47,13 +49,13 @@ const PreferenceSettings = ({ user }) => {
   
   return (
     <div className="space-y-6">
-      <div>
+      <div className="mb-6">
         <h2 className="text-2xl font-bold">Preferences</h2>
         <p className="text-muted-foreground">Customize your experience.</p>
       </div>
       
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className={`grid grid-cols-1 ${isMobile ? "" : "md:grid-cols-2"} gap-6`}>
           <div className="space-y-3">
             <Label htmlFor="theme">Theme</Label>
             <Select
@@ -149,7 +151,7 @@ const PreferenceSettings = ({ user }) => {
           <h3 className="text-lg font-semibold">Interface Settings</h3>
           
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div>
                 <Label htmlFor="autoSave" className="font-medium">
                   Auto-save Changes
@@ -165,7 +167,7 @@ const PreferenceSettings = ({ user }) => {
               />
             </div>
             
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div>
                 <Label htmlFor="compactMode" className="font-medium">
                   Compact Mode
@@ -183,7 +185,7 @@ const PreferenceSettings = ({ user }) => {
           </div>
         </div>
         
-        <Button onClick={savePreferences} disabled={isLoading}>
+        <Button onClick={savePreferences} disabled={isLoading} className="w-full sm:w-auto">
           {isLoading ? "Saving..." : "Save Preferences"}
         </Button>
       </div>

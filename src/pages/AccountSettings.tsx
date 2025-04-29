@@ -97,17 +97,17 @@ const AccountSettings = () => {
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-6">
         {isMobile ? (
           <div className="mb-6">
-            <TabsList className="w-full flex overflow-auto py-2">
+            <TabsList className="w-full flex overflow-x-auto scrollbar-hide py-2">
               <Carousel opts={{ align: "start" }} className="w-full">
                 <CarouselContent className="-ml-1">
                   {tabs.map((tab) => (
-                    <CarouselItem key={tab.value} className="pl-1 basis-1/3">
+                    <CarouselItem key={tab.value} className="pl-1 basis-auto min-w-max">
                       <TabsTrigger
                         value={tab.value}
-                        className="w-full flex flex-col items-center gap-1 p-2"
+                        className="flex flex-col items-center gap-1 p-2"
                       >
-                        {tab.icon}
-                        <span className="text-xs">{tab.label}</span>
+                        <span className="flex justify-center">{tab.icon}</span>
+                        <span className="text-xs whitespace-nowrap">{tab.label}</span>
                       </TabsTrigger>
                     </CarouselItem>
                   ))}
