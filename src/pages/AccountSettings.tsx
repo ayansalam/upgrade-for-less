@@ -15,7 +15,7 @@ import { Shield, User, Bell, CreditCard, Package, Activity, Settings } from "luc
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const AccountSettings = () => {
   const { toast } = useToast();
@@ -97,9 +97,9 @@ const AccountSettings = () => {
       
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-6">
         {isMobile ? (
-          <div className="mb-6">
+          <div className="mb-6 relative">
             <ScrollArea className="w-full pb-4">
-              <TabsList className="inline-flex w-auto min-w-full">
+              <TabsList className="inline-flex w-auto min-w-max px-1">
                 {tabs.map((tab) => (
                   <TabsTrigger
                     key={tab.value}
@@ -111,7 +111,9 @@ const AccountSettings = () => {
                   </TabsTrigger>
                 ))}
               </TabsList>
+              <ScrollBar orientation="horizontal" />
             </ScrollArea>
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none" />
           </div>
         ) : (
           <TabsList className="grid grid-cols-7 gap-2">
