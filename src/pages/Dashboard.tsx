@@ -1,9 +1,12 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PricingOptimizer } from "@/components/PricingOptimizer";
-import { LineChart, HelpCircle, Calendar, User, Settings } from "lucide-react";
+import { AIPricingAssistant } from "@/components/AIPricingAssistant";
+import { LineChart, HelpCircle, Calendar, User, Settings, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Dashboard = () => {
   // Mock user data - in a real app, this would come from a backend
@@ -11,6 +14,13 @@ const Dashboard = () => {
     name: "John Doe",
     plan: "Premium",
   };
+  
+  const [pricingFormValues, setPricingFormValues] = useState({
+    monthlyPrice: 0,
+    planName: "",
+    businessGoal: "",
+    targetAudience: "",
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,7 +56,38 @@ const Dashboard = () => {
         </Card>
         
         {/* Main Content Area */}
-        <PricingOptimizer />
+        <Tabs defaultValue="optimizer" className="mb-8">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="optimizer" className="flex items-center gap-2">
+              <LineChart className="h-4 w-4" />
+              Pricing Optimizer
+            </TabsTrigger>
+            <TabsTrigger value="ai-assistant" className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              AI Pricing Assistant
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="optimizer">
+            <PricingOptimizer initialValues={pricingFormValues} />
+          </TabsContent>
+          <TabsContent value="ai-assistant">
+            <AIPricingAssistant 
+              onUseSuggestions={(suggestions) => {
+                setPricingFormValues({
+                  monthlyPrice: suggestions.monthlyPrice,
+                  planName: suggestions.planName,
+                  businessGoal: suggestions.businessGoal,
+                  targetAudience: suggestions.targetAudience,
+                });
+                // Switch to the optimizer tab after applying suggestions
+                const optimizerTab = document.querySelector('[data-value="optimizer"]');
+                if (optimizerTab && optimizerTab instanceof HTMLElement) {
+                  optimizerTab.click();
+                }
+              }} 
+            />
+          </TabsContent>
+        </Tabs>
         
         {/* Quick Links */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">

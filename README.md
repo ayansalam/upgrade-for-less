@@ -1,73 +1,63 @@
-# Welcome to your Lovable project
+# Upgrade For Less - Pricing Optimizer
 
-## Project info
+A SaaS pricing optimization tool that helps businesses find the perfect price point for their products and services.
 
-**URL**: https://lovable.dev/projects/8b94be62-f2cc-4c1a-b4be-19f31e64221b
+## Features
 
-## How can I edit this code?
+- Pricing Optimizer: Calculate optimal pricing tiers based on your business goals
+- AI Pricing Assistant: Get AI-powered pricing suggestions using Google's Gemini API
+- User-friendly interface with modern design
 
-There are several ways of editing your application.
+## Setup
 
-**Use Lovable**
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables:
+   - Copy `.env.example` to `.env`
+   - Add your Gemini API key to the `.env` file (Get one at https://makersuite.google.com/app/apikey)
+4. Start the development server: `npm run dev`
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/8b94be62-f2cc-4c1a-b4be-19f31e64221b) and start prompting.
+## Environment Variables
 
-Changes made via Lovable will be committed automatically to this repo.
+This project uses the following environment variables:
 
-**Use your preferred IDE**
+- `VITE_GEMINI_API_KEY`: Your Google Gemini API key for AI pricing suggestions
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Development
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```powershell
+# Install dependencies
+npm install
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
+
+# Build for production
+npm run build
 ```
 
-**Edit a file directly in GitHub**
+## Testing Gemini API via PowerShell
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+To test the Gemini API directly from PowerShell (instead of curl), use the following example:
 
-**Use GitHub Codespaces**
+```powershell
+$apiKey = "YOUR_GEMINI_API_KEY"
+$body = '{
+  "contents": [{
+    "parts": [{"text": "Explain how AI works"}]
+  }]
+}'
+Invoke-RestMethod -Uri "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey" -Method Post -ContentType "application/json" -Body $body
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Replace `YOUR_GEMINI_API_KEY` with your actual API key.
 
-## What technologies are used for this project?
+## Technologies
 
-This project is built with:
-
-- Vite
-- TypeScript
 - React
-- shadcn-ui
+- TypeScript
+- Vite
 - Tailwind CSS
+- shadcn/ui components
+- Google Gemini API
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/8b94be62-f2cc-4c1a-b4be-19f31e64221b) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)

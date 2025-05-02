@@ -20,25 +20,52 @@ interface PricingFormValues {
 
 interface PricingSuggestion {
   monthlyPrice: number;
-  weeklyPrice?: number;
+  quarterlyPrice?: number;
   annualPrice?: number;
+  quarterlySavings?: number;
+  annualSavings?: number;
+  quarterlyTotalCost?: number;
+  annualTotalCost?: number;
   insight?: string;
 }
 
-export function PricingOptimizer() {
+interface PricingOptimizerProps {
+  initialValues?: {
+    monthlyPrice?: number;
+    planName?: string;
+    businessGoal?: string;
+    targetAudience?: string;
+  };
+}
+
+export function PricingOptimizer({ initialValues }: PricingOptimizerProps = {}) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [suggestion, setSuggestion] = useState<PricingSuggestion | null>(null);
   const [previewText, setPreviewText] = useState<string>("");
+  const [makeResponse, setMakeResponse] = useState<string | null>(null);
+  const [makeError, setMakeError] = useState<string | null>(null);
 
   const form = useForm<PricingFormValues>({
     defaultValues: {
-      monthlyPrice: 0,
-      planName: "",
-      businessGoal: "",
-      targetAudience: "",
+      monthlyPrice: initialValues?.monthlyPrice || 0,
+      planName: initialValues?.planName || "",
+      businessGoal: initialValues?.businessGoal || "",
+      targetAudience: initialValues?.targetAudience || "",
     },
   });
+  
+  // Update form when initialValues change
+  useEffect(() => {
+    if (initialValues) {
+      form.reset({
+        monthlyPrice: initialValues.monthlyPrice || form.getValues().monthlyPrice,
+        planName: initialValues.planName || form.getValues().planName,
+        businessGoal: initialValues.businessGoal || form.getValues().businessGoal,
+        targetAudience: initialValues.targetAudience || form.getValues().targetAudience,
+      });
+    }
+  }, [initialValues, form]);
 
   // Update preview as form values change
   const watchAll = form.watch();
@@ -65,71 +92,84 @@ export function PricingOptimizer() {
   const onSubmit = async (data: PricingFormValues) => {
     try {
       setIsLoading(true);
-      
       // Get the current user
       const { data: { user } } = await supabase.auth.getUser();
-      
-      // If no user is authenticated, show a warning
+      // Allow free trial mode for unauthenticated users
+      let userId = user ? user.id : "demo-user-id";
+      let userEmail = user ? user.email : "demo@example.com";
       if (!user) {
         toast({
-          title: "Authentication required",
-          description: "Please log in to submit pricing information.",
-          variant: "destructive",
+          title: "Free Trial Mode",
+          description: "You are using the Pricing Optimizer in free trial mode. Sign up to save your results!",
         });
-        setIsLoading(false);
-        return;
       }
-      
-      const { error } = await supabase.from("user_pricing_inputs").insert([
-        {
-          monthly_price: data.monthlyPrice,
-          plan_name: data.planName,
-          business_goal: data.businessGoal,
-          target_audience: data.targetAudience,
-          user_id: user.id,
-        },
-      ]);
-
-      if (error) throw error;
-
+      // Save input if authenticated, skip DB insert for demo
+      if (user) {
+        const { error } = await supabase.from("user_pricing_inputs").insert([
+          {
+            monthly_price: data.monthlyPrice,
+            plan_name: data.planName,
+            business_goal: data.businessGoal,
+            target_audience: data.targetAudience,
+            user_id: userId,
+          },
+        ]);
+        if (error) throw error;
+      }
       // Simulate API delay
       setTimeout(() => {
         // Generate pricing suggestions based on inputs
         const basePrice = parseFloat(data.monthlyPrice.toString());
-        const weeklyPrice = basePrice * 4 * 0.9 / 8; // 10% discount for 8-week prepay
-        const annualPrice = basePrice * 0.7; // 30% discount for annual prepay
+        
+        // Calculate quarterly price (15% discount)
+        const quarterlyDiscount = 0.15;
+        const quarterlyPrice = basePrice * (1 - quarterlyDiscount);
+        
+        // Calculate annual price (30% discount)
+        const annualDiscount = 0.30;
+        const annualPrice = basePrice * (1 - annualDiscount);
+        
+        // Calculate savings and total costs
+        const quarterlySavings = basePrice * quarterlyDiscount;
+        const annualSavings = basePrice * annualDiscount;
+        
+        // Total costs for comparison (3 months and 12 months)
+        const monthlyTotalCost = basePrice * 3; // 3 months at monthly rate
+        const quarterlyTotalCost = quarterlyPrice * 3; // 3 months at quarterly rate
+        const annualTotalCost = annualPrice * 12; // 12 months at annual rate
         
         let insight = "";
         switch(data.businessGoal) {
           case "More Signups":
-            insight = "Our data suggests lowering the entry barrier with a 14-day free trial could increase signups by 30%.";
+            insight = "Our data suggests offering a quarterly plan with 15% savings can increase conversion rates by 25% compared to monthly-only options.";
             break;
           case "Reduce Churn":
-            insight = "Offering annual plans with 30% discounts has shown to reduce churn by 45% in similar products.";
+            insight = "Customers on annual plans have 78% higher retention rates. Consider highlighting the 30% annual discount to encourage longer commitments.";
             break;
           case "Increase Revenue":
-            insight = "Consider a tiered approach with feature limitations instead of price discounts to maximize revenue.";
+            insight = "Quarterly subscribers spend 22% more annually than monthly subscribers. Emphasize the quarterly option as your recommended choice.";
             break;
           default:
-            insight = "Consider testing different price points with A/B testing to find your optimal pricing strategy.";
+            insight = "Offering multiple subscription durations with increasing discounts creates a natural upgrade path that maximizes customer lifetime value.";
         }
         
         setSuggestion({
           monthlyPrice: basePrice,
-          weeklyPrice: parseFloat(weeklyPrice.toFixed(2)),
+          quarterlyPrice: parseFloat(quarterlyPrice.toFixed(2)),
           annualPrice: parseFloat(annualPrice.toFixed(2)),
+          quarterlySavings: parseFloat(quarterlySavings.toFixed(2)),
+          annualSavings: parseFloat(annualSavings.toFixed(2)),
+          quarterlyTotalCost: parseFloat(quarterlyTotalCost.toFixed(2)),
+          annualTotalCost: parseFloat(annualTotalCost.toFixed(2)),
           insight
         });
         
-        // Show success message
         toast({
           title: "🎉 Success!",
-          description: "Your pricing suggestions have been generated.",
+          description: user ? "Your pricing suggestions have been generated." : "Your free trial pricing suggestions have been generated.",
         });
-        
         setIsLoading(false);
       }, 1500);
-      
     } catch (error) {
       toast({
         title: "Error",
@@ -285,42 +325,113 @@ export function PricingOptimizer() {
                 Based on your inputs and market research
               </CardDescription>
             </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center pb-2 border-b">
-                  <span className="font-medium">Payment Option</span>
-                  <span className="font-medium">Price</span>
+            <CardContent>
+              {suggestion ? (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <span className="font-medium">Payment Option</span>
+                    <span className="font-medium">Price</span>
+                  </div>
+                  
+                  {/* Monthly Plan */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Monthly</span>
+                      <span className="font-medium">${suggestion.monthlyPrice}/mo</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      <p>Pay month-to-month with maximum flexibility</p>
+                      <p className="mt-1">3-month cost: ${(suggestion.monthlyPrice * 3).toFixed(2)}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Quarterly Plan - Recommended */}
+                  <div className="space-y-1 bg-primary/5 p-3 rounded-md border border-primary/20 relative">
+                    <div className="absolute -top-2 right-2 bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">RECOMMENDED</div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Quarterly</span>
+                      <span className="font-medium">${suggestion.quarterlyPrice}/mo</span>
+                    </div>
+                    <div className="text-sm">
+                      <p>Save ${suggestion.quarterlySavings}/mo with quarterly billing</p>
+                      <div className="flex justify-between mt-1">
+                        <p>3-month cost: <span className="line-through text-muted-foreground">${(suggestion.monthlyPrice * 3).toFixed(2)}</span> <span className="font-medium">${suggestion.quarterlyPrice * 3}</span></p>
+                        <p className="text-green-600 font-medium">SAVE 15%</p>
+                      </div>
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-primary/10">
+                      <p className="text-sm font-medium text-primary">Upgrade from monthly and save ${((suggestion.monthlyPrice * 3) - (suggestion.quarterlyPrice * 3)).toFixed(2)} every 3 months</p>
+                    </div>
+                  </div>
+                  
+                  {/* Annual Plan */}
+                  <div className="space-y-1 bg-accent/20 p-3 rounded-md">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Annual</span>
+                      <span className="font-medium">${suggestion.annualPrice}/mo</span>
+                    </div>
+                    <div className="text-sm">
+                      <p>Our best value: Save ${suggestion.annualSavings}/mo with annual billing</p>
+                      <div className="flex justify-between mt-1">
+                        <p>Annual cost: <span className="line-through text-muted-foreground">${(suggestion.monthlyPrice * 12).toFixed(2)}</span> <span className="font-medium">${suggestion.annualTotalCost}</span></p>
+                        <p className="text-green-600 font-medium">SAVE 30%</p>
+                      </div>
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-primary/10">
+                      <p className="text-sm font-medium text-primary">Upgrade from quarterly and save ${((suggestion.quarterlyPrice * 12) - (suggestion.annualPrice * 12)).toFixed(2)} more per year</p>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 pt-4 border-t">
+                    <span className="font-medium">Research Insight:</span>
+                    <p className="text-sm text-muted-foreground mt-1">{suggestion.insight}</p>
+                  </div>
                 </div>
-                
-                <div className="flex justify-between items-center">
-                  <span>Monthly</span>
-                  <span className="font-semibold">${suggestion.monthlyPrice}/mo</span>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span>8-Week Prepay <span className="text-xs text-emerald-600 font-medium">10% SAVINGS</span></span>
-                  <span className="font-semibold">${suggestion.weeklyPrice}/week</span>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span>Annual <span className="text-xs text-emerald-600 font-medium">30% SAVINGS</span></span>
-                  <span className="font-semibold">${suggestion.annualPrice}/mo</span>
-                </div>
-
-                <div className="mt-6 pt-4 border-t">
-                  <h4 className="text-sm font-semibold mb-2">Research Insight:</h4>
-                  <p className="text-sm text-muted-foreground">{suggestion.insight}</p>
-                </div>
-              </div>
+              ) : (
+                <p className="text-muted-foreground">Submit your plan details to get suggestions.</p>
+              )}
             </CardContent>
-            <CardFooter className="border-t bg-accent/10 flex justify-between">
-              <Button variant="outline" size="sm">
+            <CardFooter className="flex gap-2">
+              <Button variant="outline" disabled={!suggestion}>
                 Download Report
               </Button>
-              <Button size="sm">
+              <Button disabled={!suggestion} className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white">
                 Apply Suggestions
               </Button>
             </CardFooter>
+          </Card>
+        )}
+        {/* Make.com Webhook Response Card */}
+        {makeResponse && (
+          <Card className="w-full border-green-400/40 mt-2">
+            <CardHeader className="bg-green-50 border-b border-green-200/40">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                Make.com Webhook Response
+              </CardTitle>
+              <CardDescription>
+                Data received from Make.com
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <pre className="text-xs bg-green-50 p-2 rounded overflow-x-auto whitespace-pre-wrap">{makeResponse}</pre>
+            </CardContent>
+          </Card>
+        )}
+        {makeError && (
+          <Card className="w-full border-red-400/40 mt-2">
+            <CardHeader className="bg-red-50 border-b border-red-200/40">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CheckCircle className="h-4 w-4 text-red-600" />
+                Make.com Webhook Error
+              </CardTitle>
+              <CardDescription>
+                There was a problem contacting Make.com
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-red-700">{makeError}</p>
+            </CardContent>
           </Card>
         )}
 
