@@ -55,6 +55,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ai_usage_count: number | null
           created_at: string
           email: string
           first_name: string | null
@@ -64,6 +65,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_usage_count?: number | null
           created_at?: string
           email: string
           first_name?: string | null
@@ -73,6 +75,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_usage_count?: number | null
           created_at?: string
           email?: string
           first_name?: string | null
@@ -80,6 +83,24 @@ export type Database = {
           is_admin?: boolean
           last_name?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      "reframing discount": {
+        Row: {
+          created_at: string
+          id: number
+          profile: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          profile?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          profile?: number
         }
         Relationships: []
       }
