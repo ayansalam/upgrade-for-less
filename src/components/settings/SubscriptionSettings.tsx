@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Check, AlertCircle } from "lucide-react";
+import { Json } from "@/integrations/supabase/types";
 
 interface SubscriptionData {
   id: string;
@@ -18,7 +19,7 @@ interface SubscriptionData {
     description: string;
     monthly_price: number;
     yearly_price: number;
-    features: string[];
+    features: Json; // Changed from string[] to Json to match Supabase's type
   };
 }
 
@@ -45,8 +46,21 @@ const SubscriptionSettings = ({ user }) => {
           .eq("user_id", user.id)
           .single();
         if (error) throw error;
-        setSubscription(data);
-        setBillingCycle(data.is_yearly ? "yearly" : "monthly");
+        if (
+          data &&
+          data.tier &&
+          typeof data.tier === "object" &&
+          "name" in data.tier &&
+          "description" in data.tier &&
+          "monthly_price" in data.tier &&
+          "yearly_price" in data.tier &&
+          "features" in data.tier
+        ) {
+          setSubscription(data);
+          setBillingCycle(data.is_yearly ? "yearly" : "monthly");
+        } else {
+          setSubscription(null);
+        }
         // Fetch all tiers
         const { data: tiersData, error: tiersError } = await supabase
           .from("tiers")
@@ -66,6 +80,41 @@ const SubscriptionSettings = ({ user }) => {
     };
     fetchSubscriptionData();
   }, [user]);
+  
+  // Helper function to safely render features that could be either string[] or Json
+  const renderFeatures = (features: Json) => {
+    if (!features) return null;
+    
+    // Try to handle features whether it's an array or a JSON string
+    let featureList: string[] = [];
+    
+    if (Array.isArray(features)) {
+      featureList = features as string[];
+    } else if (typeof features === 'string') {
+      try {
+        // Try to parse if it's a JSON string
+        const parsed = JSON.parse(features);
+        featureList = Array.isArray(parsed) ? parsed : [features];
+      } catch (e) {
+        // If parsing fails, treat as a single feature string
+        featureList = [features];
+      }
+    } else {
+      // Handle other possible types
+      featureList = [String(features)];
+    }
+    
+    return (
+      <ul className="space-y-2">
+        {featureList.map((feature, index) => (
+          <li key={index} className="flex items-start">
+            <Check className="h-4 w-4 mr-2 text-green-500" />
+            <span className="text-sm">{feature}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  };
   
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
@@ -112,7 +161,12 @@ const SubscriptionSettings = ({ user }) => {
         <p className="text-muted-foreground">Manage your subscription and billing preferences.</p>
       </div>
       
-      {subscription ? (
+      {subscription && subscription.tier && typeof subscription.tier === "object" &&
+        "name" in subscription.tier &&
+        "description" in subscription.tier &&
+        "monthly_price" in subscription.tier &&
+        "yearly_price" in subscription.tier &&
+        "features" in subscription.tier ? (
         <>
           <Card>
             <CardHeader>
@@ -127,17 +181,14 @@ const SubscriptionSettings = ({ user }) => {
                     {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
                   </span>
                 </div>
-                
                 <div className="flex items-center justify-between">
                   <p className="font-medium">Billing Cycle</p>
                   <span>{subscription.is_yearly ? "Yearly" : "Monthly"}</span>
                 </div>
-                
                 <div className="flex items-center justify-between">
                   <p className="font-medium">Next Payment</p>
                   <span>{formatDate(subscription.current_period_end)}</span>
                 </div>
-                
                 <div className="flex items-center justify-between">
                   <p className="font-medium">Amount</p>
                   <span>
@@ -155,7 +206,6 @@ const SubscriptionSettings = ({ user }) => {
               <Button>Manage Payment Details</Button>
             </CardFooter>
           </Card>
-          
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Billing Cycle</h3>
             <ToggleGroup 
@@ -195,52 +245,56 @@ const SubscriptionSettings = ({ user }) => {
       <div className="space-y-4 pt-4">
         <h3 className="text-lg font-semibold">Available Plans</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {tiers.map((tier) => (
-            <Card key={tier.id} className={tier.id === subscription?.tier_id ? "border-primary" : ""}>
-              <CardHeader>
-                <CardTitle>{tier.name}</CardTitle>
-                <CardDescription>{tier.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-2xl font-bold">
-                      {billingCycle === "monthly" 
-                        ? formatPrice(tier.monthly_price) 
-                        : formatPrice(tier.yearly_price)}
-                      <span className="text-sm font-normal text-muted-foreground">
-                        /{billingCycle === "monthly" ? "month" : "year"}
-                      </span>
-                    </p>
+          {tiers && Array.isArray(tiers) && tiers.length > 0 ? tiers
+            .filter(
+              (tier) =>
+                tier &&
+                typeof tier === "object" &&
+                "id" in tier &&
+                "name" in tier &&
+                "description" in tier &&
+                "monthly_price" in tier &&
+                "yearly_price" in tier &&
+                "features" in tier
+            )
+            .map((tier) => (
+              <Card key={tier.id} className={tier && subscription?.tier_id && tier.id === subscription.tier_id ? "border-primary" : ""}>
+                <CardHeader>
+                  <CardTitle>{tier.name}</CardTitle>
+                  <CardDescription>{tier.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-2xl font-bold">
+                        {billingCycle === "monthly" 
+                          ? formatPrice(tier.monthly_price)
+                          : formatPrice(tier.yearly_price)}
+                        <span className="text-sm font-normal text-muted-foreground">
+                          /{billingCycle === "monthly" ? "month" : "year"}
+                        </span>
+                      </p>
+                    </div>
+                    {renderFeatures(tier.features)}
                   </div>
-                  
-                  <ul className="space-y-2">
-                    {Array.isArray(tier.features) && tier.features.map((feature, index) => (
-                      <li key={index} className="flex items-start">
-                        <Check className="h-4 w-4 mr-2 text-green-500" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </CardContent>
-              <CardFooter>
-                {tier.id === subscription?.tier_id ? (
-                  <Button className="w-full" disabled>
-                    Current Plan
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    className="w-full" 
-                    onClick={() => handleChangePlan(tier.id)}
-                  >
-                    {subscription ? "Change Plan" : "Select Plan"}
-                  </Button>
-                )}
-              </CardFooter>
-            </Card>
-          ))}
+                </CardContent>
+                <CardFooter>
+                  {tier && subscription && tier.id === subscription.tier_id ? (
+                    <Button className="w-full" disabled>
+                      Current Plan
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      className="w-full" 
+                      onClick={() => handleChangePlan(tier.id)}
+                    >
+                      {subscription ? "Change Plan" : "Select Plan"}
+                    </Button>
+                  )}
+                </CardFooter>
+              </Card>
+            )) : <p>No plans available.</p>}
         </div>
       </div>
     </div>
