@@ -8,11 +8,9 @@ import SecuritySettings from "@/components/settings/SecuritySettings";
 import SubscriptionSettings from "@/components/settings/SubscriptionSettings";
 import NotificationSettings from "@/components/settings/NotificationSettings";
 import PaymentSettings from "@/components/settings/PaymentSettings";
-import UsageSettings from "@/components/settings/UsageSettings";
-import PreferenceSettings from "@/components/settings/PreferenceSettings";
+// Removed UsageSettings and PreferenceSettings imports
 import { useToast } from "@/hooks/use-toast";
-import { Shield, User, Bell, CreditCard, Package, Activity, Settings } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Shield, User, Bell, CreditCard, Package } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -33,8 +31,6 @@ const AccountSettings = () => {
     { value: "subscription", icon: <Package className="h-4 w-4" />, label: "Subscription" },
     { value: "notifications", icon: <Bell className="h-4 w-4" />, label: "Notifications" },
     { value: "payment", icon: <CreditCard className="h-4 w-4" />, label: "Payment" },
-    { value: "usage", icon: <Activity className="h-4 w-4" />, label: "Usage" },
-    { value: "preferences", icon: <Settings className="h-4 w-4" />, label: "Preferences" },
   ];
 
   useEffect(() => {
@@ -43,30 +39,10 @@ const AccountSettings = () => {
     if (tabParam) {
       setActiveTab(tabParam);
     }
-    
-    const checkUser = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-          setUser(session.user);
-          setIsLoading(false);
-          return;
-        }
-        
-        console.log("No authenticated session, entering demo mode");
-        setDemoMode(true);
-        setUser({ id: "demo-user-id", email: "demo@example.com" });
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error checking authentication:", error);
-        setDemoMode(true);
-        setUser({ id: "demo-user-id", email: "demo@example.com" });
-        setIsLoading(false);
-      }
-    };
-
-    checkUser();
+    // Demo mode: always use demo user
+    setDemoMode(true);
+    setUser({ id: "demo-user-id", email: "demo@example.com" });
+    setIsLoading(false);
   }, [location.search]);
 
   if (isLoading) {
@@ -116,7 +92,7 @@ const AccountSettings = () => {
             <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none" />
           </div>
         ) : (
-          <TabsList className="grid grid-cols-7 gap-2">
+          <TabsList className="grid grid-cols-5 gap-2">
             {tabs.map((tab) => (
               <TabsTrigger
                 key={tab.value}
@@ -160,17 +136,7 @@ const AccountSettings = () => {
           </Card>
         </TabsContent>
         
-        <TabsContent value="usage">
-          <Card className="p-6">
-            <UsageSettings user={user} />
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="preferences">
-          <Card className="p-6">
-            <PreferenceSettings user={user} />
-          </Card>
-        </TabsContent>
+        {/* Removed Usage and Preferences tabs content */}
       </Tabs>
     </div>
   );

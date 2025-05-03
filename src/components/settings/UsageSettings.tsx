@@ -5,33 +5,48 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { LineChart } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const UsageSettings = ({ user }) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [usageData, setUsageData] = useState(null);
-  
+
   useEffect(() => {
-    // Simulate loading usage data
-    setTimeout(() => {
-      setUsageData({
-        totalRequests: 14872,
-        apiLimit: 20000,
-        usage: 74.36,
-        history: [
-          { month: "Jan", requests: 1250 },
-          { month: "Feb", requests: 1380 },
-          { month: "Mar", requests: 1490 },
-          { month: "Apr", requests: 2100 },
-          { month: "May", requests: 2340 },
-          { month: "Jun", requests: 3200 },
-          { month: "Jul", requests: 3112 },
-        ],
-      });
-      setIsLoading(false);
-    }, 1000);
-  }, []);
-  
+    async function fetchUsage() {
+      setIsLoading(true);
+      if (!user) {
+        setUsageData(null);
+        setIsLoading(false);
+        return;
+      }
+      try {
+        // Fetch usage from Supabase
+        const { data, error } = await supabase
+          .from("usage")
+          .select("*")
+          .eq("user_id", user.id)
+          .single();
+        if (error) throw error;
+        setUsageData({
+          totalRequests: data.total_requests || 0,
+          apiLimit: 20000,
+          usage: data.total_requests ? ((data.total_requests / 20000) * 100).toFixed(2) : 0,
+          history: data.history || [],
+        });
+      } catch (err) {
+        toast({
+          title: "Error loading usage",
+          description: err.message || "Could not fetch usage data.",
+          variant: "destructive",
+        });
+        setUsageData(null);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchUsage();
+  }, [user]);
   const handleGenerateApiKey = () => {
     toast({
       title: "Feature Coming Soon",
@@ -123,11 +138,11 @@ const UsageSettings = ({ user }) => {
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Button variant="outline" className="justify-start">
+          <Button variant="outline" className="justify-start" onClick={() => window.open(`/api/reports/july?user=${user?.id}`)}>
             <LineChart className="h-4 w-4 mr-2" />
             Download July Report
           </Button>
-          <Button variant="outline" className="justify-start">
+          <Button variant="outline" className="justify-start" onClick={() => window.open(`/api/reports/q2?user=${user?.id}`)}>
             <LineChart className="h-4 w-4 mr-2" />
             Download Q2 Report
           </Button>

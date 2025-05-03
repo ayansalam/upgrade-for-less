@@ -2,10 +2,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/AuthModal";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { user, signOut } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -35,12 +39,29 @@ const Navbar = () => {
 
           {/* Auth Buttons - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button asChild variant="outline">
-              <Link to="/auth">Login</Link>
-            </Button>
-            <Button asChild>
-              <Link to="/auth?tab=signup">Sign Up</Link>
-            </Button>
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <Button asChild variant="ghost" size="sm">
+                  <Link to="/dashboard" className="flex items-center">
+                    <User className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" onClick={signOut} className="flex items-center">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => setShowAuthModal(true)}>
+                  Login
+                </Button>
+                <Button onClick={() => { setShowAuthModal(true); }}>
+                  Sign Up
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -79,21 +100,61 @@ const Navbar = () => {
                 Support
               </Link>
               <div className="flex flex-col space-y-2 pt-2 border-t border-gray-100">
-                <Button asChild variant="outline" className="w-full">
-                  <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                    Login
-                  </Link>
-                </Button>
-                <Button asChild className="w-full">
-                  <Link to="/auth?tab=signup" onClick={() => setIsMenuOpen(false)}>
-                    Sign Up
-                  </Link>
-                </Button>
+                {user ? (
+                  <>
+                    <Button asChild variant="ghost" className="w-full justify-start">
+                      <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="flex items-center">
+                        <User className="h-4 w-4 mr-2" />
+                        Dashboard
+                      </Link>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start" 
+                      onClick={() => {
+                        signOut();
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      className="w-full" 
+                      onClick={() => {
+                        setShowAuthModal(true);
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      Login
+                    </Button>
+                    <Button 
+                      className="w-full" 
+                      onClick={() => {
+                        setShowAuthModal(true);
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      Sign Up
+                    </Button>
+                  </>
+                )}
               </div>
             </nav>
           </div>
         )}
       </div>
+      
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)}
+        defaultTab="login"
+      />
     </header>
   );
 };

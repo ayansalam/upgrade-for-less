@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -7,8 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, Loader2, ArrowRight, AlertCircle } from "lucide-react";
+import { Sparkles, Loader2, ArrowRight, AlertCircle, Lock, AlertTriangle } from "lucide-react";
 import { generatePricingSuggestions, extractJsonFromResponse } from "@/api/gemini";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/AuthModal";
 
 
 // This interface is now defined inside the component
@@ -25,9 +27,14 @@ interface AIPricingSuggestion {
 
 export function AIPricingAssistant({ onUseSuggestions }: { onUseSuggestions?: (suggestions: AIPricingSuggestion) => void }) {
   const { toast } = useToast();
+  const { user, incrementAiUsageCount } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [suggestion, setSuggestion] = useState<AIPricingSuggestion | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  
+  // Check if user has reached the free usage limit
+  const hasReachedLimit = false;
 
   interface AIPricingFormValues {
     businessDescription: string;
@@ -49,6 +56,35 @@ export function AIPricingAssistant({ onUseSuggestions }: { onUseSuggestions?: (s
     try {
       setIsLoading(true);
       setApiError(null);
+      
+      // Check if user is logged in
+      if (!user) {
+        toast({
+          title: "Login Required",
+          description: "Please login to use the AI Pricing Assistant.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Check if user has reached the free usage limit
+      if (hasReachedLimit) {
+        setShowUpgradePrompt(true);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Increment the AI usage count
+      const incrementSuccess = await incrementAiUsageCount();
+      
+      if (!incrementSuccess) {
+        // If increment failed, user has likely reached the limit
+        setShowUpgradePrompt(true);
+        setIsLoading(false);
+        return;
+      }
+      
       const response = await generatePricingSuggestions({
         businessDescription: data.businessDescription,
         monthlyPrice: data.monthlyPrice,
@@ -110,7 +146,7 @@ export function AIPricingAssistant({ onUseSuggestions }: { onUseSuggestions?: (s
             AI Pricing Assistant
           </CardTitle>
           <CardDescription className="text-purple-700">
-            Get AI-powered pricing suggestions using our Gemini integration
+            Get AI-powered pricing suggestions using our AI integration
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
@@ -216,6 +252,38 @@ export function AIPricingAssistant({ onUseSuggestions }: { onUseSuggestions?: (s
                 <div>
                   <h4 className="text-sm font-medium text-red-800">API Error</h4>
                   <p className="text-xs text-red-700 mt-1">{apiError}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {showUpgradePrompt && (
+            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-md">
+              <div className="flex items-start">
+                <AlertTriangle className="h-5 w-5 text-amber-600 mr-2 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-medium text-amber-800">Usage Limit Reached</h4>
+                  <p className="text-xs text-amber-700 mt-1">
+                    You've used all 3 of your free AI pricing suggestions. Upgrade to continue using this feature.
+                  </p>
+                  <Button 
+                    className="mt-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
+                    size="sm"
+                  >
+                    Upgrade Now
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {user && !hasReachedLimit && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
+              <div className="flex items-start">
+                <div>
+                  <p className="text-xs text-blue-700">
+                    AI Usage: N/A
+                  </p>
                 </div>
               </div>
             </div>

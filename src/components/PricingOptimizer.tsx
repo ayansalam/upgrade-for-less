@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, LineChart, CheckCircle, Loader2 } from "lucide-react";
 
 interface PricingFormValues {
@@ -92,52 +91,24 @@ export function PricingOptimizer({ initialValues }: PricingOptimizerProps = {}) 
   const onSubmit = async (data: PricingFormValues) => {
     try {
       setIsLoading(true);
-      // Get the current user
-      const { data: { user } } = await supabase.auth.getUser();
-      // Allow free trial mode for unauthenticated users
-      let userId = user ? user.id : "demo-user-id";
-      let userEmail = user ? user.email : "demo@example.com";
-      if (!user) {
-        toast({
-          title: "Free Trial Mode",
-          description: "You are using the Pricing Optimizer in free trial mode. Sign up to save your results!",
-        });
-      }
-      // Save input if authenticated, skip DB insert for demo
-      if (user) {
-        const { error } = await supabase.from("user_pricing_inputs").insert([
-          {
-            monthly_price: data.monthlyPrice,
-            plan_name: data.planName,
-            business_goal: data.businessGoal,
-            target_audience: data.targetAudience,
-            user_id: userId,
-          },
-        ]);
-        if (error) throw error;
-      }
+      // Removed Supabase user fetch and DB insert logic
       // Simulate API delay
       setTimeout(() => {
         // Generate pricing suggestions based on inputs
         const basePrice = parseFloat(data.monthlyPrice.toString());
-        
         // Calculate quarterly price (15% discount)
         const quarterlyDiscount = 0.15;
         const quarterlyPrice = basePrice * (1 - quarterlyDiscount);
-        
         // Calculate annual price (30% discount)
         const annualDiscount = 0.30;
         const annualPrice = basePrice * (1 - annualDiscount);
-        
         // Calculate savings and total costs
         const quarterlySavings = basePrice * quarterlyDiscount;
         const annualSavings = basePrice * annualDiscount;
-        
         // Total costs for comparison (3 months and 12 months)
         const monthlyTotalCost = basePrice * 3; // 3 months at monthly rate
         const quarterlyTotalCost = quarterlyPrice * 3; // 3 months at quarterly rate
         const annualTotalCost = annualPrice * 12; // 12 months at annual rate
-        
         let insight = "";
         switch(data.businessGoal) {
           case "More Signups":
@@ -152,7 +123,6 @@ export function PricingOptimizer({ initialValues }: PricingOptimizerProps = {}) 
           default:
             insight = "Offering multiple subscription durations with increasing discounts creates a natural upgrade path that maximizes customer lifetime value.";
         }
-        
         setSuggestion({
           monthlyPrice: basePrice,
           quarterlyPrice: parseFloat(quarterlyPrice.toFixed(2)),
@@ -163,10 +133,9 @@ export function PricingOptimizer({ initialValues }: PricingOptimizerProps = {}) 
           annualTotalCost: parseFloat(annualTotalCost.toFixed(2)),
           insight
         });
-        
         toast({
           title: "🎉 Success!",
-          description: user ? "Your pricing suggestions have been generated." : "Your free trial pricing suggestions have been generated.",
+          description: "Your pricing suggestions have been generated.",
         });
         setIsLoading(false);
       }, 1500);
@@ -392,12 +361,31 @@ export function PricingOptimizer({ initialValues }: PricingOptimizerProps = {}) 
               )}
             </CardContent>
             <CardFooter className="flex gap-2">
-              <Button variant="outline" disabled={!suggestion}>
-                Download Report
-              </Button>
-              <Button disabled={!suggestion} className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white">
-                Apply Suggestions
-              </Button>
+              <Button onClick={() => {
+                if (!suggestion) {
+                  toast({ title: "No report available", description: "Please generate suggestions first.", variant: "destructive" });
+                  return;
+                }
+                // Simulate report download
+                const report = `Pricing Report\nPlan: ${form.getValues().planName}\nMonthly: $${suggestion.monthlyPrice}\nQuarterly: $${suggestion.quarterlyPrice}\nAnnual: $${suggestion.annualPrice}\nInsight: ${suggestion.insight}`;
+                const blob = new Blob([report], { type: "text/plain" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "pricing-report.txt";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                toast({ title: "Report Downloaded", description: "Your pricing report has been downloaded." });
+              }} variant="outline">Download Report</Button>
+              <Button onClick={() => {
+                if (!suggestion) {
+                  toast({ title: "No suggestions", description: "Please generate suggestions first.", variant: "destructive" });
+                  return;
+                }
+                toast({ title: "Suggestions Applied", description: "Your pricing suggestions have been applied!" });
+              }} className="ml-2">Apply Suggestions</Button>
             </CardFooter>
           </Card>
         )}

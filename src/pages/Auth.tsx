@@ -7,16 +7,21 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Loader2 } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { signIn, signUp, isLoading } = useAuth();
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [signupName, setSignupName] = useState("");
+  const [signupFirstName, setSignupFirstName] = useState("");
+  const [signupLastName, setSignupLastName] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [defaultTab, setDefaultTab] = useState("login");
+  const [error, setError] = useState("");
   
   useEffect(() => {
     // Extract tab from URL if present
@@ -27,43 +32,36 @@ const Auth = () => {
     }
   }, [location.search]);
   
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     
-    // Simulate authentication - in a real app, this would validate with a backend
-    toast({
-      title: "Logged in successfully",
-      description: "Redirecting to your dashboard...",
-    });
-    
-    // Clear form and redirect
-    setLoginEmail("");
-    setLoginPassword("");
-    
-    // Redirect to dashboard after a short delay
-    setTimeout(() => {
+    try {
+      await signIn(loginEmail, loginPassword);
+      
+      // Clear form and redirect
+      setLoginEmail("");
+      setLoginPassword("");
+      
+      // Redirect to dashboard
       navigate("/dashboard");
-    }, 1500);
+    } catch (err: any) {
+      setError(err.message || "Failed to login");
+    }
   };
   
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     
-    // Simulate account creation - in a real app, this would create an account in the backend
-    toast({
-      title: "Account created successfully",
-      description: "Redirecting to your dashboard...",
-    });
-    
-    // Clear form and redirect
-    setSignupName("");
-    setSignupEmail("");
-    setSignupPassword("");
-    
-    // Redirect to dashboard after a short delay
-    setTimeout(() => {
+    try {
+      await signUp(signupEmail, signupPassword);
+      setSignupEmail("");
+      setSignupPassword("");
       navigate("/dashboard");
-    }, 1500);
+    } catch (err: any) {
+      setError(err.message || "Failed to create account");
+    }
   };
 
   return (
@@ -105,8 +103,18 @@ const Auth = () => {
                     />
                   </div>
                 </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full">Login</Button>
+                <CardFooter className="flex flex-col gap-4">
+                  {error && <p className="text-sm text-red-500 w-full">{error}</p>}
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Logging in...
+                      </>
+                    ) : (
+                      'Login'
+                    )}
+                  </Button>
                 </CardFooter>
               </form>
             </Card>
@@ -120,16 +128,6 @@ const Auth = () => {
               </CardHeader>
               <form onSubmit={handleSignup}>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
-                    <Input 
-                      id="signup-name" 
-                      placeholder="John Doe" 
-                      value={signupName}
-                      onChange={(e) => setSignupName(e.target.value)}
-                      required
-                    />
-                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
                     <Input 
@@ -152,8 +150,18 @@ const Auth = () => {
                     />
                   </div>
                 </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full">Create Account</Button>
+                <CardFooter className="flex flex-col gap-4">
+                  {error && <p className="text-sm text-red-500 w-full">{error}</p>}
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating account...
+                      </>
+                    ) : (
+                      'Create Account'
+                    )}
+                  </Button>
                 </CardFooter>
               </form>
             </Card>

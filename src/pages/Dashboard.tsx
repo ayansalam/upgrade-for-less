@@ -1,19 +1,26 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PricingOptimizer } from "@/components/PricingOptimizer";
 import { AIPricingAssistant } from "@/components/AIPricingAssistant";
-import { LineChart, HelpCircle, Calendar, User, Settings, Sparkles } from "lucide-react";
+import { LineChart, HelpCircle, Calendar, User, Settings, Sparkles, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/AuthModal";
 
 const Dashboard = () => {
-  // Mock user data - in a real app, this would come from a backend
-  const userData = {
-    name: "John Doe",
-    plan: "Premium",
-  };
+  const navigate = useNavigate();
+  const { user, isLoading } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  
+  // Redirect to auth page if not authenticated
+  useEffect(() => {
+    if (!isLoading && !user) {
+      setShowAuthModal(true);
+    }
+  }, [user, isLoading, navigate]);
   
   const [pricingFormValues, setPricingFormValues] = useState({
     monthlyPrice: 0,
@@ -28,7 +35,11 @@ const Dashboard = () => {
         <div className="flex flex-col md:flex-row justify-between items-start mb-8">
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-gray-500">Welcome back, {userData.name}</p>
+            {user ? (
+              <p className="text-gray-500">Welcome, {user.email.split('@')[0]}</p>
+            ) : (
+              <p className="text-gray-500">Please log in to access your dashboard</p>
+            )}
           </div>
           <div className="mt-4 md:mt-0 flex flex-wrap gap-2">
             <Button asChild variant="outline">
@@ -151,6 +162,13 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
+      
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => navigate('/')} 
+        onSuccess={() => setShowAuthModal(false)}
+      />
     </div>
   );
 };

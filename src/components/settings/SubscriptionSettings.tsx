@@ -32,59 +32,40 @@ const SubscriptionSettings = ({ user }) => {
   useEffect(() => {
     const fetchSubscriptionData = async () => {
       setIsLoading(true);
+      if (!user) {
+        setSubscription(null);
+        setIsLoading(false);
+        return;
+      }
       try {
-        // Get subscription data
-        const { data: subscriptionData, error: subscriptionError } = await supabase
+        // Fetch subscription from Supabase
+        const { data, error } = await supabase
           .from("subscriptions")
-          .select(`
-            *,
-            tier:tier_id (
-              name,
-              description,
-              monthly_price,
-              yearly_price,
-              features
-            )
-          `)
+          .select("*,tier:tiers(*)")
           .eq("user_id", user.id)
-          .maybeSingle();
-          
-        if (subscriptionError) {
-          throw subscriptionError;
-        }
-        
-        if (subscriptionData) {
-          setSubscription(subscriptionData);
-          setBillingCycle(subscriptionData.is_yearly ? "yearly" : "monthly");
-        }
-        
-        // Get all available tiers
+          .single();
+        if (error) throw error;
+        setSubscription(data);
+        setBillingCycle(data.is_yearly ? "yearly" : "monthly");
+        // Fetch all tiers
         const { data: tiersData, error: tiersError } = await supabase
-          .from("subscription_tiers")
-          .select("*")
-          .order("monthly_price", { ascending: true });
-          
-        if (tiersError) {
-          throw tiersError;
-        }
-        
-        setTiers(tiersData || []);
-      } catch (error) {
-        console.error("Error fetching subscription data:", error);
+          .from("tiers")
+          .select("*");
+        if (tiersError) throw tiersError;
+        setTiers(tiersData);
+      } catch (err) {
         toast({
-          title: "Error",
-          description: "Failed to load your subscription information.",
+          title: "Error loading subscription",
+          description: err.message || "Could not fetch subscription data.",
           variant: "destructive",
         });
+        setSubscription(null);
       } finally {
         setIsLoading(false);
       }
     };
-    
-    if (user) {
-      fetchSubscriptionData();
-    }
-  }, [user, toast]);
+    fetchSubscriptionData();
+  }, [user]);
   
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {

@@ -24,7 +24,7 @@ This project uses the following environment variables:
 - `VITE_GEMINI_API_KEY`: Your Google Gemini API key for AI pricing suggestions
 
 ## Development
-
+hk hai  
 ```powershell
 # Install dependencies
 npm install

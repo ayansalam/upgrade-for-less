@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 
@@ -41,19 +40,11 @@ const SecuritySettings = ({ user }) => {
     
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: formData.newPassword,
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
+      // Demo mode: just show a success message
       toast({
-        title: "Password Updated",
-        description: "Your password has been successfully changed.",
+        title: "Demo Mode",
+        description: "Password would be updated in a real account.",
       });
-      
       form.reset();
     } catch (error) {
       console.error("Error changing password:", error);

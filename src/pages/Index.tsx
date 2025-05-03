@@ -6,10 +6,15 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Check, Brain, Sparkles, Zap, BarChart, Users, Shield, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import { AIPricingSuggestionDemo } from "@/components/AIPricingSuggestionDemo";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/AuthModal";
 
 const Index = () => {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [activeFaq, setActiveFaq] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { user } = useAuth();
   
   // Testimonials data
   const testimonials = [
@@ -151,13 +156,53 @@ const Index = () => {
               </motion.p>
               
               <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button asChild size="lg" className="bg-primary hover:bg-primary/90 shadow-lg">
-                  <Link to="/pricing">Get Started <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                <Button 
+                  size="lg" 
+                  className="bg-primary hover:bg-primary/90 shadow-lg"
+                  onClick={() => {
+                    if (!user) {
+                      setShowAuthModal(true);
+                    } else {
+                      window.location.href = '/dashboard';
+                    }
+                  }}
+                >
+                  Try Now <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 <Button asChild variant="outline" size="lg" className="border-primary text-primary hover:bg-primary/5">
                   <Link to="/features">See How It Works</Link>
                 </Button>
               </motion.div>
+            </motion.div>
+          </div>
+        </section>
+        
+        {/* AI Pricing Suggestion Feature */}
+        <section className="py-20 px-4 bg-gradient-to-br from-gray-50 to-gray-100">
+          <div className="container mx-auto max-w-6xl">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-16"
+            >
+              <div className="inline-block mb-3 bg-primary/10 px-4 py-1 rounded-full">
+                <span className="text-primary font-medium flex items-center">
+                  <Sparkles className="h-4 w-4 mr-2" /> New Feature
+                </span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">AI-Powered Pricing Suggestions</h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Optimize your pricing strategy with intelligent recommendations powered by AI.
+              </p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <AIPricingSuggestionDemo className="max-w-5xl mx-auto" />
             </motion.div>
           </div>
         </section>
@@ -561,6 +606,13 @@ const Index = () => {
           </div>
         </section>
       </main>
+      
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => window.location.href = '/dashboard'}
+      />
       
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300 py-12 px-4">
