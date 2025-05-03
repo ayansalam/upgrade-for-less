@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Check, AlertCircle } from "lucide-react";
+import { Json } from "@/integrations/supabase/types";
 
 interface SubscriptionData {
   id: string;
@@ -18,7 +19,7 @@ interface SubscriptionData {
     description: string;
     monthly_price: number;
     yearly_price: number;
-    features: string[];
+    features: Json; // Changed from string[] to Json to match Supabase's type
   };
 }
 
@@ -54,7 +55,7 @@ const SubscriptionSettings = ({ user }) => {
         }
         
         if (subscriptionData) {
-          setSubscription(subscriptionData);
+          setSubscription(subscriptionData as SubscriptionData);
           setBillingCycle(subscriptionData.is_yearly ? "yearly" : "monthly");
         }
         
@@ -85,6 +86,41 @@ const SubscriptionSettings = ({ user }) => {
       fetchSubscriptionData();
     }
   }, [user, toast]);
+  
+  // Helper function to safely render features that could be either string[] or Json
+  const renderFeatures = (features: Json) => {
+    if (!features) return null;
+    
+    // Try to handle features whether it's an array or a JSON string
+    let featureList: string[] = [];
+    
+    if (Array.isArray(features)) {
+      featureList = features as string[];
+    } else if (typeof features === 'string') {
+      try {
+        // Try to parse if it's a JSON string
+        const parsed = JSON.parse(features);
+        featureList = Array.isArray(parsed) ? parsed : [features];
+      } catch (e) {
+        // If parsing fails, treat as a single feature string
+        featureList = [features];
+      }
+    } else {
+      // Handle other possible types
+      featureList = [String(features)];
+    }
+    
+    return (
+      <ul className="space-y-2">
+        {featureList.map((feature, index) => (
+          <li key={index} className="flex items-start">
+            <Check className="h-4 w-4 mr-2 text-green-500" />
+            <span className="text-sm">{feature}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  };
   
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
@@ -233,14 +269,7 @@ const SubscriptionSettings = ({ user }) => {
                     </p>
                   </div>
                   
-                  <ul className="space-y-2">
-                    {Array.isArray(tier.features) && tier.features.map((feature, index) => (
-                      <li key={index} className="flex items-start">
-                        <Check className="h-4 w-4 mr-2 text-green-500" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {renderFeatures(tier.features)}
                 </div>
               </CardContent>
               <CardFooter>
