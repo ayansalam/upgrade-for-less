@@ -1,39 +1,13 @@
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { Calendar, Clock, Mail, MessageCircle, Phone } from "lucide-react";
+import { Mail, MessageCircle, Phone } from "lucide-react";
 
 const Support = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // In a real app, this would send the form data to a backend
-    toast({
-      title: "Message sent",
-      description: "We'll get back to you as soon as possible.",
-    });
-    
-    // Clear form
-    setName("");
-    setEmail("");
-    setMessage("");
-  };
-
-  const handleScheduleDemo = () => {
-    toast({
-      title: "Demo Scheduled",
-      description: "Our team will contact you to confirm the details.",
-    });
-  };
+  // Demo scheduling removed as per requirements
 
   const faqs = [
     {
@@ -60,59 +34,34 @@ const Support = () => {
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">Support & Resources</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Get help with our platform or schedule a demo to see how we can boost your conversions.
+            Get help with our platform or learn how we can boost your conversions.
           </p>
         </div>
         
         <div className="grid gap-8 md:grid-cols-2">
-          {/* Contact Form */}
+          {/* Contact Us */}
           <Card>
             <CardHeader>
               <CardTitle>Contact Us</CardTitle>
-              <CardDescription>Fill out the form below and we'll get back to you as soon as possible.</CardDescription>
+              <CardDescription>Get in touch with our team for support and assistance.</CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit}>
-                <div className="grid gap-4">
-                  <div className="grid gap-2">
-                    <label htmlFor="name">Name</label>
-                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
-                  </div>
-                  <div className="grid gap-2">
-                    <label htmlFor="email">Email</label>
-                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                  </div>
-                  <div className="grid gap-2">
-                    <label htmlFor="message">Message</label>
-                    <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} rows={4} required />
-                  </div>
-                </div>
-                <Button type="submit" className="w-full mt-4">Send Message</Button>
-              </form>
+            <CardContent className="space-y-4">
+              <Button className="w-full flex items-center justify-center gap-2" asChild>
+                <a href="mailto:support@myemail.com">
+                  <Mail className="h-5 w-5" /> Email Us
+                </a>
+              </Button>
+              <Button className="w-full flex items-center justify-center gap-2" variant="outline" asChild>
+                <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="h-5 w-5" /> Message on WhatsApp
+                </a>
+              </Button>
             </CardContent>
           </Card>
           
           {/* Demo and Contact Info */}
           <div className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Schedule a Demo</CardTitle>
-                <CardDescription>See how our platform can work for your business.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center">
-                  <Calendar className="h-5 w-5 mr-2 text-primary" />
-                  <span>30-minute personalized demonstration</span>
-                </div>
-                <div className="flex items-center">
-                  <Clock className="h-5 w-5 mr-2 text-primary" />
-                  <span>Available weekdays 9am-5pm EST</span>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button onClick={handleScheduleDemo} className="w-full">Schedule Now</Button>
-              </CardFooter>
-            </Card>
+            {/* Demo scheduling section removed */}
             
             <Card>
               <CardHeader>
@@ -121,11 +70,11 @@ const Support = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center">
                   <Mail className="h-5 w-5 mr-2 text-primary" />
-                  <span>support@upgradeforless.com</span>
+                  <span>support@myemail.com</span>
                 </div>
                 <div className="flex items-center">
                   <Phone className="h-5 w-5 mr-2 text-primary" />
-                  <span>+1 (555) 123-4567</span>
+                  <span>+1234567890</span>
                 </div>
                 <div className="flex items-center">
                   <MessageCircle className="h-5 w-5 mr-2 text-primary" />

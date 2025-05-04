@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PricingOptimizer } from "@/components/PricingOptimizer";
 import { AIPricingAssistant } from "@/components/AIPricingAssistant";
-import { LineChart, HelpCircle, Calendar, User, Settings, Sparkles, Lock } from "lucide-react";
+import { LineChart, HelpCircle, User, Settings, Sparkles, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -129,9 +129,7 @@ const Dashboard = () => {
                 <Button variant="ghost" className="w-full justify-start" size="sm" asChild>
                   <Link to="/support"><HelpCircle className="h-4 w-4 mr-2" /> Help Center</Link>
                 </Button>
-                <Button variant="ghost" className="w-full justify-start" size="sm" asChild>
-                  <Link to="/calendar"><Calendar className="h-4 w-4 mr-2" /> Schedule Demo</Link>
-                </Button>
+                {/* Demo scheduling link removed */}
               </div>
             </CardContent>
           </Card>
