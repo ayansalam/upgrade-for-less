@@ -30,8 +30,70 @@ const CashfreeCheckout = ({
   const [isLoading, setIsLoading] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string>("");
+  const [sdkLoaded, setSdkLoaded] = useState(false);
 
-  const createPaymentOrder = async () => {
+  useEffect(() => {
+    // Dynamically load Cashfree SDK script with retry mechanism
+    const scriptId = "cashfree-sdk-script";
+    let retryCount = 0;
+    const maxRetries = 3;
+    const loadScript = () => {
+      if (!document.getElementById(scriptId)) {
+        const script = document.createElement("script");
+        script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+        script.async = true;
+        script.id = scriptId;
+        script.onload = () => setSdkLoaded(true);
+        script.onerror = () => {
+          retryCount++;
+          if (retryCount < maxRetries) {
+            setTimeout(loadScript, 1000 * retryCount); // Exponential backoff
+          } else {
+            setSdkLoaded(false);
+            toast({
+              title: "Cashfree SDK failed to load",
+              description: "Unable to load payment SDK after multiple attempts. Please refresh or try again later.",
+              variant: "destructive"
+            });
+          }
+        };
+        document.body.appendChild(script);
+      } else {
+        setSdkLoaded(true);
+      }
+    };
+    loadScript();
+  }, []);
+
+  const createPaymentSession = async () => {
+    try {
+      setIsLoading(true);
+      // Call your backend to create a payment session and get paymentSessionId
+      const res = await fetch("/api/create-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount })
+      });
+      const data = await res.json();
+      if (data.paymentSessionId) {
+        return data.paymentSessionId;
+      } else {
+        throw new Error("Failed to get paymentSessionId");
+      }
+    } catch (error) {
+      toast({
+        title: "Payment initialization failed",
+        description: error.message || "Could not initialize payment",
+        variant: "destructive"
+      });
+      if (onFailure) onFailure(error);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCheckoutClick = async () => {
     if (!user) {
       toast({
         title: "Authentication required",
@@ -40,78 +102,30 @@ const CashfreeCheckout = ({
       });
       return;
     }
-
-    setIsLoading(true);
-    try {
-      // Generate a unique order ID
-      const uniqueOrderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-      setOrderId(uniqueOrderId);
-
-      const orderData: PaymentOrderRequest = {
-        orderId: uniqueOrderId,
-        orderAmount: amount,
-        orderCurrency: currency,
-        customerDetails: {
-          customerId: user.id,
-          customerEmail: user.email,
-          customerName: user.email.split('@')[0] // Basic fallback if name is not available
-        },
-        orderMeta: {
-          returnUrl: `${returnUrl}?order_id=${uniqueOrderId}`,
-          notifyUrl: `${window.location.origin}/api/webhooks/cashfree`
-        }
-      };
-
-      const response = await cashfreeApi.createPaymentOrder(orderData);
-      
-      if (response && response.paymentLink) {
-        setCheckoutUrl(response.paymentLink);
-      } else {
-        throw new Error("Payment link not received from Cashfree");
-      }
-    } catch (error) {
-      console.error("Error creating payment order:", error);
+    if (!sdkLoaded || !window.Cashfree) {
       toast({
-        title: "Payment initialization failed",
-        description: error.message || "Could not initialize payment",
+        title: "Cashfree SDK not loaded",
+        description: sdkLoaded ? "Cashfree object missing. Please refresh and try again." : "SDK failed to load. Please try again later.",
+        variant: "destructive"
+      });
+      return;
+    }
+    const paymentSessionId = await createPaymentSession();
+    if (!paymentSessionId) return;
+    try {
+      window.Cashfree.init({ paymentSessionId });
+      window.Cashfree.pay();
+      if (onSuccess) onSuccess({ paymentSessionId });
+    } catch (error) {
+      console.error("Cashfree payment failed", error);
+      toast({
+        title: "Payment Modal Error",
+        description: error.message || "Unexpected error occurred during payment",
         variant: "destructive"
       });
       if (onFailure) onFailure(error);
-    } finally {
-      setIsLoading(false);
     }
   };
-
-  const handleCheckoutClick = () => {
-    if (checkoutUrl) {
-      window.location.href = checkoutUrl;
-    } else {
-      createPaymentOrder();
-    }
-  };
-
-  useEffect(() => {
-    // If order ID exists, check payment status periodically
-    if (orderId) {
-      const checkStatus = async () => {
-        try {
-          const orderDetails = await cashfreeApi.getOrderDetails(orderId);
-          if (orderDetails.orderStatus === "PAID" || orderDetails.orderStatus === "SUCCESS") {
-            toast({
-              title: "Payment successful",
-              description: "Your payment has been processed successfully"
-            });
-            if (onSuccess) onSuccess(orderDetails);
-          }
-        } catch (error) {
-          console.error("Error checking payment status:", error);
-        }
-      };
-
-      // Check once when component mounts with an order ID
-      checkStatus();
-    }
-  }, [orderId, onSuccess, toast]);
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -130,7 +144,6 @@ const CashfreeCheckout = ({
               }).format(amount)}
             </div>
           </div>
-
           {user ? (
             <div className="space-y-2">
               <Label>Email</Label>
