@@ -21,11 +21,23 @@ import About from "./pages/About";
 import Careers from "./pages/Careers";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import PaymentStatus from "./pages/PaymentStatus";
+import Checkout from "./pages/Checkout";
+
+// API routes
+import { handleApiRequest } from "./api/routes";
 
 // Create a client
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  // Handle API routes
+  if (window.location.pathname.startsWith('/api/')) {
+    handleApiRequest(new Request(window.location.href));
+    return null;
+  }
+  
+  return (
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
@@ -49,6 +61,8 @@ const App = () => (
               <Route path="/careers" element={<Careers />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/payment-status" element={<PaymentStatus />} />
+              <Route path="/checkout" element={<Checkout />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
@@ -56,6 +70,7 @@ const App = () => (
       </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>
-);
+  );
+};
 
 export default App;

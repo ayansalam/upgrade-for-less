@@ -334,20 +334,23 @@ export function PricingOptimizer({ initialValues }: PricingOptimizerProps = {}) 
                   </div>
                   
                   {/* Annual Plan */}
-                  <div className="space-y-1 bg-accent/20 p-3 rounded-md">
+                  <div className="space-y-1 bg-accent/20 p-3 rounded-md relative border border-yellow-400/40">
+                    <div className="absolute -top-2 right-2 bg-yellow-400 text-white text-xs px-2 py-0.5 rounded-full font-bold shadow">BEST VALUE</div>
                     <div className="flex items-center justify-between">
                       <span className="font-medium">Annual</span>
-                      <span className="font-medium">${suggestion.annualPrice}/mo</span>
+                      <span className="font-medium">${suggestion.annualPrice}/mo <span className="text-xs text-muted-foreground">billed annually</span></span>
                     </div>
                     <div className="text-sm">
-                      <p>Our best value: Save ${suggestion.annualSavings}/mo with annual billing</p>
+                      <p className="font-semibold text-green-700">Save ${suggestion.annualSavings} ({((suggestion.annualSavings/(suggestion.monthlyPrice*12))*100).toFixed(0)}%)</p>
                       <div className="flex justify-between mt-1">
                         <p>Annual cost: <span className="line-through text-muted-foreground">${(suggestion.monthlyPrice * 12).toFixed(2)}</span> <span className="font-medium">${suggestion.annualTotalCost}</span></p>
                         <p className="text-green-600 font-medium">SAVE 30%</p>
                       </div>
                     </div>
-                    <div className="mt-2 pt-2 border-t border-primary/10">
-                      <p className="text-sm font-medium text-primary">Upgrade from quarterly and save ${((suggestion.quarterlyPrice * 12) - (suggestion.annualPrice * 12)).toFixed(2)} more per year</p>
+                    <div className="mt-2 pt-2 border-t border-primary/10 flex flex-col gap-1">
+                      <p className="text-sm font-medium text-primary">Most users choose this</p>
+                      <p className="text-xs text-gray-600">Risk-free guarantee</p>
+                      <p className="text-xs text-orange-600 font-semibold mt-1">Limited time offer <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full ml-1">Ends in 2 days</span></p>
                     </div>
                   </div>
                   

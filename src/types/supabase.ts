@@ -1,0 +1,1 @@
+// This file will contain generated Supabase types. Replace this with actual types after running the Supabase CLI.
