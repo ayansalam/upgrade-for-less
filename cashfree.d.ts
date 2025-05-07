@@ -3,6 +3,7 @@ declare global {
     Cashfree: {
       init: (options: { paymentSessionId: string }) => void;
       pay: () => void;
+      checkout: (options: { paymentSessionId: string; redirectTarget?: string }) => void;
     };
   }
 }

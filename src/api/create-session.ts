@@ -1,6 +1,5 @@
-// Remove Vercel types and use standard Node.js/Next.js types
-// import type { VercelRequest, VercelResponse } from '@vercel/node';
-// Use standard types below or add your framework's types as needed
+// Import types for request and response
+import type { Request, Response } from 'express';
 
 // Replace with your actual Cashfree credentials
 const CASHFREE_CLIENT_ID = process.env.CASHFREE_CLIENT_ID || '';
@@ -39,7 +38,7 @@ async function createCashfreeSession(amount: number) {
   return data.payment_session_id;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: Request, res: Response) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }

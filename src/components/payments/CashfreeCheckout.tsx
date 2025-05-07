@@ -40,7 +40,7 @@ const CashfreeCheckout = ({
     const loadScript = () => {
       if (!document.getElementById(scriptId)) {
         const script = document.createElement("script");
-        script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+        script.src = "https://sdk.cashfree.com/js/ui/2.0.0/cashfree.prod.js";
         script.async = true;
         script.id = scriptId;
         script.onload = () => setSdkLoaded(true);
@@ -113,8 +113,10 @@ const CashfreeCheckout = ({
     const paymentSessionId = await createPaymentSession();
     if (!paymentSessionId) return;
     try {
-      window.Cashfree.init({ paymentSessionId });
-      window.Cashfree.pay();
+      window.Cashfree.checkout({
+        paymentSessionId,
+        redirectTarget: "_self"
+      });
       if (onSuccess) onSuccess({ paymentSessionId });
     } catch (error) {
       console.error("Cashfree payment failed", error);
