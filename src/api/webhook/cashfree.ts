@@ -2,17 +2,15 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Only POST allowed' });
+    return res.status(405).json({ message: 'Only POST method is allowed' });
   }
 
-  let rawBody = "";
-
-  req.on("data", chunk => {
-    rawBody += chunk;
-  });
-
-  req.on("end", () => {
-    console.log("✅ Webhook Received:", rawBody);
-    res.status(200).json({ success: true });
-  });
+  try {
+    console.log("✅ Webhook Received:", req.body);
+    // TODO: Add signature validation here if Cashfree requires it
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("❌ Error processing webhook:", error);
+    return res.status(500).json({ success: false });
+  }
 }
