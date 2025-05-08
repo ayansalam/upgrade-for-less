@@ -1,11 +1,12 @@
 import axios from 'axios';
 import { supabase } from "@/integrations/supabase/client";
-import { CashfreeTransaction, CashfreeTransactionStatus } from "@/integrations/supabase/cashfree-types";
+import { CashfreeTransaction, CashfreeTransactionStatus, CashfreeTransactionInsert, CashfreeWebhookData } from "@/integrations/supabase/cashfree-types";
+import { Json } from "@/integrations/supabase/types";
 
-// Cashfree API credentials
-const CASHFREE_APP_ID = '75930545239664b66952792a56503957';
-const CASHFREE_SECRET_KEY = 'cfsk_ma_prod_11258e59b378f85d97315442e06ac120_568afe95';
-const CASHFREE_API_BASE_URL = 'https://api.cashfree.com/pg';
+// Cashfree API credentials from environment variables
+const CASHFREE_APP_ID = import.meta.env.CASHFREE_CLIENT_ID || '75930545239664b66952792a56503957';
+const CASHFREE_SECRET_KEY = import.meta.env.CASHFREE_CLIENT_SECRET || 'cfsk_ma_prod_11258e59b378f85d97315442e06ac120_568afe95';
+const CASHFREE_API_BASE_URL = import.meta.env.CASHFREE_ENV === 'PROD' ? 'https://api.cashfree.com/pg' : 'https://sandbox.cashfree.com/pg';
 
 // Cashfree API client
 const cashfreeClient = axios.create({

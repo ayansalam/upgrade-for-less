@@ -58,7 +58,8 @@ const Auth = () => {
       await signUp(signupEmail, signupPassword);
       setSignupEmail("");
       setSignupPassword("");
-      navigate("/dashboard");
+      // Redirect to dashboard with newSignup parameter to trigger payment flow
+      navigate("/dashboard?newSignup=true");
     } catch (err: any) {
       setError(err.message || "Failed to create account");
     }

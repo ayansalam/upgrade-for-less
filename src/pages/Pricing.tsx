@@ -96,9 +96,13 @@ const Pricing = () => {
           <CardFooter>
             <Button 
               className="w-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-medium py-3 rounded-lg transition-colors"
-              asChild
+              onClick={() => {
+                // Store selected plan in localStorage before redirecting
+                localStorage.setItem("selectedPlan", "pro");
+                window.location.href = "/auth?tab=signup";
+              }}
             >
-              <Link to="/auth?tab=signup">{getButtonText()}</Link>
+              {getButtonText()}
             </Button>
           </CardFooter>
         </Card>
