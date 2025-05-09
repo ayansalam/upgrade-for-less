@@ -1,4 +1,4 @@
-import { cashfreeClient } from "@/integrations/cashfree/client";
+import { cashfreeApi } from "@/integrations/cashfree/client";
 import { CashfreeWebhookData } from "@/integrations/supabase/cashfree-types";
 
 /**
@@ -28,7 +28,7 @@ export async function handleCashfreeWebhook(request: Request) {
     // }
     
     // Process the webhook notification
-    await cashfreeClient.processWebhookNotification(webhookData);
+    await cashfreeApi.processWebhookNotification(webhookData);
     
     // Return success response
     return new Response(JSON.stringify({ received: true }), {
