@@ -1,23 +1,39 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import getRawBody from 'raw-body';
-// Enhanced logging for debugging webhook invocation and request body
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  console.log("📩 Incoming request to /api/webhook/cashfree");
-  console.log("Method:", req.method);
-  console.log("Headers:", req.headers);
-  if (req.method !== 'POST') {
-    console.log("Non-POST request received. Body:", req.body);
-    return res.status(405).json({ message: 'Only POST method is allowed' });
-  }
-  try {
-    const rawBody = await getRawBody(req);
-    const parsedBody = rawBody.toString(); // Cashfree usually sends form-encoded or raw JSON
-    console.log("✅ Raw Body:", parsedBody);
-    // TODO: Parse or verify signature here if needed
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("❌ Error processing webhook:", error);
-    return res.status(500).json({ success: false });
+import { NextApiRequest, NextApiResponse } from 'next';
+
+// Local type definition for webhook data
+type CashfreeWebhookData = {
+  data: {
+    orderId: string;
+    order_id?: string;
+    payment_id?: string;
+    orderAmount?: string | number;
+    amount?: string | number;
+    status?: string;
+    [key: string]: any;
+  };
+};
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'POST') {
+    const webhookData: CashfreeWebhookData = req.body;
+
+    console.log('✅ Received Cashfree webhook:', webhookData);
+
+    // Log important info
+    console.log(`Order ID: ${webhookData.data?.orderId || webhookData.data?.order_id || 'N/A'}`);
+    console.log(`Status: ${webhookData.data?.status || 'N/A'}`);
+    console.log(`Amount: ${webhookData.data?.orderAmount || webhookData.data?.amount || 'N/A'}`);
+    
+    // Add additional error handling
+    try {
+      // Process webhook data here
+      // Future implementation can go here
+    } catch (error) {
+      console.error('Error processing webhook data:', error);
+    }
+
+    res.status(200).json({ received: true });
+  } else {
+    res.status(405).end(); // Method Not Allowed
   }
 }
-// trigger redeploy
