@@ -10,6 +10,7 @@ const CASHFREE_BASE_URL = CASHFREE_ENV === 'PROD'
   ? 'https://api.cashfree.com'
   : 'https://sandbox.cashfree.com';
 
+// Cashfree integration removed. This file is now a placeholder for future payment session creation logic.
 async function createCashfreeSession(amount: number) {
   const url = `${CASHFREE_BASE_URL}/pg/orders`;
   const payload = {

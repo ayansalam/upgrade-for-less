@@ -1,4 +1,4 @@
--- Migration: Add payments table for Cashfree integration (supports INR, USD, etc.)
+-- Migration: Add payments table for generic payment integration (supports INR, USD, etc.)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS payments (

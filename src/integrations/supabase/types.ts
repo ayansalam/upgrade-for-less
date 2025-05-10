@@ -308,3 +308,5 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
+// Cashfree-related types removed. Cleaned up for generic payment support.

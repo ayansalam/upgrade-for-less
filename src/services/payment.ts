@@ -1,13 +1,11 @@
-import { cashfreeApi, PaymentLinkRequest } from "@/integrations/cashfree/client";
 import { supabase } from "@/integrations/supabase/client";
-import { CashfreeTransaction, CashfreeTransactionInsert, CashfreeTransactionStatus } from "@/integrations/supabase/cashfree-types";
 import { Json } from "@/integrations/supabase/types";
 
 /**
  * Payment Service
  * 
- * This service provides functions for handling payments and transactions
- * using the Cashfree payment gateway integration.
+ * This service provides functions for handling payments and transactions.
+ * Note: External payment gateway integration has been removed.
  */
 
 // Types
@@ -21,6 +19,9 @@ export interface PaymentDetails {
   metadata?: Record<string, any>;
 }
 
+// Payment status types
+export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'FAILED' | 'CANCELLED';
+
 export interface TransactionDetails {
   id: string;
   order_id: string;
@@ -28,7 +29,7 @@ export interface TransactionDetails {
   user_id: string;
   amount: number;
   currency: string;
-  status: CashfreeTransactionStatus;
+  status: PaymentStatus;
   payment_method?: string;
   created_at: string;
   updated_at: string;
@@ -40,22 +41,33 @@ export const createPaymentCheckout = async (paymentDetails: PaymentDetails): Pro
   try {
     // Generate a unique order ID
     const uniqueOrderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-    const orderData = {
+    
+    // Create a mock payment order response
+    const response = {
       orderId: uniqueOrderId,
       orderAmount: paymentDetails.amount,
       orderCurrency: paymentDetails.currency,
+      orderStatus: 'ACTIVE',
       customerDetails: {
         customerId: paymentDetails.userId,
         customerEmail: paymentDetails.userEmail,
         customerName: paymentDetails.userName || paymentDetails.userEmail.split('@')[0]
       },
-      orderMeta: {
-        returnUrl: `${window.location.origin}/payment-status?order_id=${uniqueOrderId}`,
-        notifyUrl: `${window.location.origin}/api/webhooks/cashfree`
-      },
-      orderNote: paymentDetails.purpose
+      paymentUrl: `${window.location.origin}/checkout?order_id=${uniqueOrderId}&amount=${paymentDetails.amount}&currency=${paymentDetails.currency}`,
+      orderNote: paymentDetails.purpose,
+      createdAt: new Date().toISOString()
     };
-    const response = await cashfreeApi.createPaymentOrder(orderData);
+    
+    // Store transaction in database
+    await storeTransaction({
+      order_id: uniqueOrderId,
+      user_id: paymentDetails.userId,
+      amount: paymentDetails.amount,
+      currency: paymentDetails.currency,
+      status: 'PENDING',
+      metadata: paymentDetails.metadata as Json
+    });
+    
     return response;
   } catch (error: any) {
     console.error('Error creating payment checkout:', error);
@@ -68,22 +80,33 @@ export const createPaymentLink = async (paymentDetails: PaymentDetails): Promise
   try {
     // Generate a unique link ID
     const uniqueLinkId = `link_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-    const linkData: PaymentLinkRequest = {
+    
+    // Create a mock payment link response
+    const response = {
       linkId: uniqueLinkId,
+      linkUrl: `${window.location.origin}/checkout?link_id=${uniqueLinkId}&amount=${paymentDetails.amount}&currency=${paymentDetails.currency}&purpose=${encodeURIComponent(paymentDetails.purpose)}`,
       linkAmount: paymentDetails.amount,
       linkCurrency: paymentDetails.currency,
-      linkPurpose: paymentDetails.purpose,
+      linkStatus: 'ACTIVE',
+      linkExpiryTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days expiry
+      linkCreatedAt: new Date().toISOString(),
       customerDetails: {
         customerId: paymentDetails.userId,
         customerEmail: paymentDetails.userEmail,
         customerName: paymentDetails.userName || paymentDetails.userEmail.split('@')[0]
-      },
-      linkExpiryTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days expiry
-      linkNotifyBy: 'EMAIL',
-      linkAutoReminders: true,
-      metadata: paymentDetails.metadata
+      }
     };
-    const response = await cashfreeApi.createPaymentLink(linkData);
+    
+    // Store transaction in database
+    await storeTransaction({
+      payment_link_id: uniqueLinkId,
+      user_id: paymentDetails.userId,
+      amount: paymentDetails.amount,
+      currency: paymentDetails.currency,
+      status: 'PENDING',
+      metadata: paymentDetails.metadata as Json
+    });
+    
     return response;
   } catch (error: any) {
     console.error('Error creating payment link:', error);
@@ -92,26 +115,25 @@ export const createPaymentLink = async (paymentDetails: PaymentDetails): Promise
 };
 
 // Get user's transaction history
-export const getUserTransactions = async (userId: string): Promise<CashfreeTransaction[]> => {
+export const getUserTransactions = async (userId: string): Promise<TransactionDetails[]> => {
   try {
     const { data, error } = await supabase
-      .from('cashfree_transactions')
+      .from('payments')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
     if (error) throw error;
     
-    // Convert Supabase data to CashfreeTransaction type
-    const transactions: CashfreeTransaction[] = data?.map(item => ({
+    // Convert Supabase data to TransactionDetails type
+    const transactions: TransactionDetails[] = data?.map(item => ({
       id: item.id,
-      order_id: item.order_id,
+      order_id: item.order_id || '',
       payment_link_id: item.payment_link_id,
       user_id: item.user_id,
       amount: item.amount,
       currency: item.currency,
-      status: item.status as CashfreeTransactionStatus,
+      status: item.status as PaymentStatus,
       payment_method: item.payment_method,
-      reference_id: item.reference_id,
       created_at: item.created_at,
       updated_at: item.updated_at,
       metadata: item.metadata
@@ -125,10 +147,10 @@ export const getUserTransactions = async (userId: string): Promise<CashfreeTrans
 };
 
 // Get transaction details by order ID
-export const getTransactionByOrderId = async (orderId: string): Promise<CashfreeTransaction | null> => {
+export const getTransactionByOrderId = async (orderId: string): Promise<TransactionDetails | null> => {
   try {
     const { data, error } = await supabase
-      .from('cashfree_transactions')
+      .from('payments')
       .select('*')
       .eq('order_id', orderId)
       .single();
@@ -139,17 +161,16 @@ export const getTransactionByOrderId = async (orderId: string): Promise<Cashfree
     
     if (!data) return null;
     
-    // Convert Supabase data to CashfreeTransaction type
-    const transaction: CashfreeTransaction = {
+    // Convert Supabase data to TransactionDetails type
+    const transaction: TransactionDetails = {
       id: data.id,
-      order_id: data.order_id,
+      order_id: data.order_id || '',
       payment_link_id: data.payment_link_id,
       user_id: data.user_id,
       amount: data.amount,
       currency: data.currency,
-      status: data.status as CashfreeTransactionStatus,
+      status: data.status as PaymentStatus,
       payment_method: data.payment_method,
-      reference_id: data.reference_id,
       created_at: data.created_at,
       updated_at: data.updated_at,
       metadata: data.metadata
@@ -165,10 +186,85 @@ export const getTransactionByOrderId = async (orderId: string): Promise<Cashfree
 // Check payment status
 export const checkPaymentStatus = async (orderId: string): Promise<Record<string, any>> => {
   try {
-    const orderDetails = await cashfreeApi.getOrderDetails(orderId);
-    return orderDetails;
+    // Get transaction from database
+    const transaction = await getTransactionByOrderId(orderId);
+    
+    if (!transaction) {
+      throw new Error('Transaction not found');
+    }
+    
+    // Return mock order details
+    return {
+      orderId: transaction.order_id,
+      orderAmount: transaction.amount,
+      orderCurrency: transaction.currency,
+      orderStatus: transaction.status,
+      paymentDetails: {
+        paymentMethod: transaction.payment_method || 'CARD',
+        paymentTime: transaction.updated_at
+      },
+      customerDetails: {
+        customerId: transaction.user_id
+      },
+      createdAt: transaction.created_at,
+      updatedAt: transaction.updated_at
+    };
   } catch (error: any) {
     console.error('Error checking payment status:', error);
+    throw error;
+  }
+};
+
+// Helper function to store transaction in database
+const storeTransaction = async (transactionData: {
+  order_id?: string;
+  payment_link_id?: string;
+  user_id: string;
+  amount: number;
+  currency: string;
+  status: PaymentStatus;
+  payment_method?: string;
+  metadata?: Json;
+}) => {
+  try {
+    const { error } = await supabase
+      .from('payments')
+      .insert({
+        order_id: transactionData.order_id,
+        payment_link_id: transactionData.payment_link_id,
+        user_id: transactionData.user_id,
+        amount: transactionData.amount,
+        currency: transactionData.currency,
+        status: transactionData.status,
+        payment_method: transactionData.payment_method,
+        metadata: transactionData.metadata
+      });
+    
+    if (error) throw error;
+    
+    return true;
+  } catch (error: any) {
+    console.error('Error storing transaction:', error);
+    throw error;
+  }
+};
+
+// Update payment status
+export const updatePaymentStatus = async (orderId: string, status: PaymentStatus): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('payments')
+      .update({ 
+        status,
+        updated_at: new Date().toISOString()
+      })
+      .eq('order_id', orderId);
+    
+    if (error) throw error;
+    
+    return true;
+  } catch (error: any) {
+    console.error('Error updating payment status:', error);
     throw error;
   }
 };

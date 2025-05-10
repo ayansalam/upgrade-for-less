@@ -6,9 +6,7 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   define: {
-    'import.meta.env.CASHFREE_CLIENT_ID': JSON.stringify(process.env.CASHFREE_CLIENT_ID),
-    'import.meta.env.CASHFREE_CLIENT_SECRET': JSON.stringify(process.env.CASHFREE_CLIENT_SECRET),
-    'import.meta.env.CASHFREE_ENV': JSON.stringify(process.env.CASHFREE_ENV),
+    // Cashfree environment variables have been removed
   },
   server: {
     port: 8081,

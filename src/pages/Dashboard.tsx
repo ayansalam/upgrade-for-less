@@ -17,7 +17,6 @@ const Dashboard = () => {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [paymentProcessing, setPaymentProcessing] = useState(false);
   
   // Redirect to auth page if not authenticated
   useEffect(() => {
@@ -26,106 +25,27 @@ const Dashboard = () => {
     }
   }, [user, isLoading, navigate]);
   
-  // Load Cashfree SDK
-  const [sdkLoaded, setSdkLoaded] = useState(false);
+  // Payment SDK loading has been removed
   
-  useEffect(() => {
-    // Dynamically load Cashfree SDK script with retry mechanism
-    const scriptId = "cashfree-sdk-script";
-    let retryCount = 0;
-    const maxRetries = 3;
-    const loadScript = () => {
-      if (!document.getElementById(scriptId)) {
-        const script = document.createElement("script");
-        script.src = "https://sdk.cashfree.com/js/ui/2.0.0/cashfree.prod.js";
-        script.async = true;
-        script.id = scriptId;
-        script.onload = () => setSdkLoaded(true);
-        script.onerror = () => {
-          retryCount++;
-          if (retryCount < maxRetries) {
-            setTimeout(loadScript, 1000 * retryCount); // Exponential backoff
-          } else {
-            setSdkLoaded(false);
-            toast({
-              title: "Cashfree SDK failed to load",
-              description: "Unable to load payment SDK after multiple attempts. Please refresh or try again later.",
-              variant: "destructive"
-            });
-          }
-        };
-        document.body.appendChild(script);
-      } else {
-        setSdkLoaded(true);
-      }
-    };
-    loadScript();
-  }, []);
+  // Payment processing code has been removed
   
-  // Check for new signup and trigger payment
+  // Check for new signup
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const isNewUser = queryParams.get('newSignup') === 'true';
     const selectedPlan = localStorage.getItem('selectedPlan');
     
-    if (isNewUser && selectedPlan && user && !paymentProcessing && sdkLoaded) {
-      initiatePayment(selectedPlan);
-    }
-  }, [location.search, user, paymentProcessing, sdkLoaded]);
-  
-  const initiatePayment = async (plan: string) => {
-    try {
-      setPaymentProcessing(true);
-      // Calculate amount based on plan
-      const amount = plan === 'pro' ? 999 : 499; // Adjust pricing as needed
-      
-      const response = await fetch('/api/create-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount }),
-      });
-      
-      const data = await response.json();
-      
-      if (data.paymentSessionId) {
-        // Check if Cashfree SDK is loaded
-        if (typeof window.Cashfree !== 'undefined') {
-          try {
-            window.Cashfree.checkout({
-              paymentSessionId: data.paymentSessionId,
-              redirectTarget: '_self',
-            });
-            // Clear the selectedPlan from localStorage after initiating payment
-            localStorage.removeItem('selectedPlan');
-          } catch (sdkError) {
-            console.error('Cashfree checkout error:', sdkError);
-            toast({
-              title: 'Payment Modal Error',
-              description: 'Could not initialize payment interface. Please try again.',
-              variant: 'destructive',
-            });
-          }
-        } else {
-          toast({
-            title: 'Payment SDK not loaded',
-            description: 'Please refresh the page and try again',
-            variant: 'destructive',
-          });
-        }
-      } else {
-        throw new Error(data.error || 'Payment session creation failed');
-      }
-    } catch (error: any) {
-      console.error('Payment initiation failed:', error);
+    if (isNewUser && selectedPlan && user) {
+      // Payment integration has been removed
+      // Clear the selectedPlan from localStorage
+      localStorage.removeItem('selectedPlan');
       toast({
-        title: 'Payment Failed',
-        description: error.message || 'Could not initiate payment process',
-        variant: 'destructive',
+        title: "Welcome to Upgrade For Less",
+        description: "Your account has been created successfully.",
+        variant: "default"
       });
-    } finally {
-      setPaymentProcessing(false);
     }
-  };
+  }, [location.search, user]);
   
   const [pricingFormValues, setPricingFormValues] = useState({
     monthlyPrice: 0,

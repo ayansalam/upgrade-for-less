@@ -9,8 +9,7 @@ import { CreditCard, Trash2, Plus, Link } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import CashfreeCheckout from "../payments/CashfreeCheckout";
-import CashfreePaymentLink from "../payments/CashfreePaymentLink";
+// Payment components imports have been removed
 import TransactionHistory from "../payments/TransactionHistory";
 import PaymentButton from "../payments/PaymentButton";
 
@@ -72,7 +71,7 @@ const PaymentSettings = ({ user }: PaymentSettingsProps) => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('cashfree_transactions')
+        .from('payments')
         .select('*')
         .eq('user_id', authUser.id)
         .order('created_at', { ascending: false });
@@ -93,8 +92,8 @@ const PaymentSettings = ({ user }: PaymentSettingsProps) => {
   
   const handleAddPaymentMethod = () => {
     toast({
-      title: "Cashfree Integration Active",
-      description: "You can now use Cashfree to process payments and create payment links.",
+      title: "Add Payment Method",
+      description: "This feature will be available in a future update.",
     });
   };
   
@@ -189,10 +188,9 @@ const PaymentSettings = ({ user }: PaymentSettingsProps) => {
       </div>
 
       <Tabs defaultValue="methods" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="methods">Payment Methods</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="cashfree">Cashfree Payments</TabsTrigger>
         </TabsList>
 
         <TabsContent value="methods" className="space-y-4 mt-4">
@@ -293,61 +291,7 @@ const PaymentSettings = ({ user }: PaymentSettingsProps) => {
           <TransactionHistory limit={20} showTitle={true} />
         </TabsContent>
 
-        <TabsContent value="cashfree" className="space-y-6 mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Make a Payment</h3>
-              <p className="text-muted-foreground mb-6">Process a one-time payment using Cashfree</p>
-              
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Quick Payment</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <PaymentButton 
-                      amount={99} 
-                      purpose="Basic Plan" 
-                      variant="outline"
-                    />
-                    <PaymentButton 
-                      amount={199} 
-                      purpose="Premium Plan" 
-                      variant="default"
-                    />
-                  </div>
-                </div>
-                
-                <div className="pt-4 border-t">
-                  <CashfreeCheckout
-                    amount={100}
-                    currency="INR"
-                    purpose="Custom Payment"
-                    onSuccess={handlePaymentSuccess}
-                    onFailure={handlePaymentFailure}
-                  />
-                </div>
-              </div>
-            </Card>
-            
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Create Payment Link</h3>
-              <p className="text-muted-foreground mb-6">Generate a shareable payment link</p>
-              
-              <CashfreePaymentLink
-                defaultAmount={200}
-                defaultCurrency="INR"
-                defaultPurpose="Shared Payment"
-                onSuccess={handlePaymentSuccess}
-                onFailure={handlePaymentFailure}
-              />
-            </Card>
-          </div>
 
-          <div className="mt-6 pt-6 border-t">
-            <h3 className="text-lg font-semibold">Payment Gateway Information</h3>
-            <p className="text-sm text-muted-foreground mt-2">
-              This application is integrated with Cashfree payment gateway to securely process payments.
-              Cashfree supports both national and international payments with various payment methods.
-            </p>
           </div>
         </TabsContent>
       </Tabs>

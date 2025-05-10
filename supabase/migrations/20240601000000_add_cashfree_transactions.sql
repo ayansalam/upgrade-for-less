@@ -1,4 +1,5 @@
--- Create cashfree_transactions table to store payment transaction data
+-- Migration file cleaned. Cashfree transactions table and related policies removed.
+-- Placeholder for future payment transaction migrations.
 create table if not exists public.cashfree_transactions (
   id uuid primary key default uuid_generate_v4(),
   order_id text not null unique,

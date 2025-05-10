@@ -7,9 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { cashfreeApi } from "@/integrations/cashfree/client";
-import { Loader2, CreditCard, AlertCircle } from "lucide-react";
-import CashfreeCheckout from "@/components/payments/CashfreeCheckout";
+import { Loader2, CreditCard, AlertCircle, CheckCircle } from "lucide-react";
 
 interface CheckoutProps {}
 
@@ -163,14 +161,67 @@ const Checkout = ({}: CheckoutProps) => {
               </div>
             )}
             
-            <CashfreeCheckout
-              amount={amount}
-              currency={currency}
-              purpose={purpose || "Payment for services"}
-              onSuccess={handlePaymentSuccess}
-              onFailure={handlePaymentFailure}
-              returnUrl={`${window.location.origin}/payment-status`}
-            />
+            <Card>
+              <CardHeader>
+                <CardTitle>Payment Method</CardTitle>
+                <CardDescription>Complete your payment</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 border rounded-md flex items-center gap-3">
+                  <CreditCard className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="font-medium">Credit/Debit Card</p>
+                    <p className="text-sm text-muted-foreground">Pay securely with your card</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="card-number">Card Number</Label>
+                  <Input id="card-number" placeholder="1234 5678 9012 3456" />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="expiry">Expiry Date</Label>
+                    <Input id="expiry" placeholder="MM/YY" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cvv">CVV</Label>
+                    <Input id="cvv" placeholder="123" />
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  className="w-full" 
+                  onClick={() => {
+                    setIsLoading(true);
+                    // Simulate payment processing
+                    setTimeout(() => {
+                      setIsLoading(false);
+                      // Redirect to payment status page with success status
+                      navigate(`/payment-status?order_id=${Date.now()}&status=success&amount=${amount}`);
+                    }, 1500);
+                  }}
+                  disabled={isLoading || amount <= 0 || !purpose}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Pay {amount > 0 ? new Intl.NumberFormat('en-IN', {
+                        style: 'currency',
+                        currency: currency
+                      }).format(amount) : ''}
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
           </div>
         </div>
       )}
