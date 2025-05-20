@@ -1,6 +1,7 @@
--- Migration file cleaned. Cashfree transactions table and related policies removed.
+-- Migration file for payment transactions table and related policies.
+-- Note: Original table name kept for compatibility, but used for generic payment processing.
 -- Placeholder for future payment transaction migrations.
-create table if not exists public.cashfree_transactions (
+create table if not exists public.cashfree_transactions ( -- Table name kept for compatibility
   id uuid primary key default uuid_generate_v4(),
   order_id text not null unique,
   payment_link_id text,
@@ -15,7 +16,7 @@ create table if not exists public.cashfree_transactions (
   metadata jsonb
 );
 
--- Add RLS policies for cashfree_transactions
+-- Add RLS policies for payment transactions
 alter table public.cashfree_transactions enable row level security;
 
 -- Users can only view their own transactions

@@ -6,7 +6,7 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   define: {
-    // Cashfree environment variables have been removed
+    // Payment gateway environment variables
   },
   server: {
     port: 8081,

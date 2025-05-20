@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 // Payment components imports have been removed
 import TransactionHistory from "../payments/TransactionHistory";
 import PaymentButton from "../payments/PaymentButton";
+import { TransactionDetails, PaymentStatus } from "@/services/payment";
 
 interface PaymentMethod {
   id: string;
@@ -30,7 +31,10 @@ interface Transaction {
   amount: number;
   currency: string;
   status: string;
+  payment_method?: string;
   created_at: string;
+  updated_at: string;
+  metadata?: Record<string, any> | null;
 }
 
 interface PaymentSettingsProps {
@@ -45,7 +49,7 @@ const PaymentSettings = ({ user }: PaymentSettingsProps) => {
   const { user: authUser } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<TransactionDetails[]>([]);
   
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
     {
@@ -75,10 +79,23 @@ const PaymentSettings = ({ user }: PaymentSettingsProps) => {
         .select('*')
         .eq('user_id', authUser.id)
         .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setTransactions(data || []);
-    } catch (error) {
+    if (error) throw error;
+    // Map data to TransactionDetails structure
+    const mapped = (data || []).map((item: any) => ({
+      id: item.id,
+      order_id: item.order_id || '',
+      payment_link_id: item.payment_link_id,
+      user_id: item.user_id,
+      amount: item.amount,
+      currency: item.currency,
+      status: item.status as PaymentStatus,
+      payment_method: item.payment_method,
+      created_at: item.created_at,
+      updated_at: item.updated_at,
+      metadata: item.metadata
+    }));
+    setTransactions(mapped);
+    } catch (error: any) {
       console.error('Error fetching transactions:', error);
       toast({
         title: "Failed to load transactions",
@@ -289,10 +306,6 @@ const PaymentSettings = ({ user }: PaymentSettingsProps) => {
 
         <TabsContent value="transactions" className="space-y-4 mt-4">
           <TransactionHistory limit={20} showTitle={true} />
-        </TabsContent>
-
-
-          </div>
         </TabsContent>
       </Tabs>
     </div>

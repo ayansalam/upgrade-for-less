@@ -5,7 +5,7 @@ import { Json } from "@/integrations/supabase/types";
  * Payment Service
  * 
  * This service provides functions for handling payments and transactions.
- * Note: External payment gateway integration has been removed.
+ * Note: This is a generic payment service with no external payment gateway integration.
  */
 
 // Types
@@ -20,20 +20,21 @@ export interface PaymentDetails {
 }
 
 // Payment status types
-export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'FAILED' | 'CANCELLED';
+export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'FAILED';
 
 export interface TransactionDetails {
   id: string;
-  order_id: string;
-  payment_link_id?: string;
-  user_id: string;
+  order_id?: string;
+  payment_id?: string;
   amount: number;
   currency: string;
-  status: PaymentStatus;
+  payment_status: PaymentStatus;
+  payment_date: string;
+  customer_email?: string;
+  user_id?: string;
   payment_method?: string;
-  created_at: string;
-  updated_at: string;
-  metadata?: Record<string, any> | null;
+  country?: string;
+  metadata?: Json;
 }
 
 // Create a payment checkout session
@@ -64,7 +65,9 @@ export const createPaymentCheckout = async (paymentDetails: PaymentDetails): Pro
       user_id: paymentDetails.userId,
       amount: paymentDetails.amount,
       currency: paymentDetails.currency,
-      status: 'PENDING',
+      payment_status: 'PENDING' as PaymentStatus,
+      payment_date: new Date().toISOString(),
+      customer_email: paymentDetails.userEmail,
       metadata: paymentDetails.metadata as Json
     });
     
@@ -99,11 +102,13 @@ export const createPaymentLink = async (paymentDetails: PaymentDetails): Promise
     
     // Store transaction in database
     await storeTransaction({
-      payment_link_id: uniqueLinkId,
+      order_id: uniqueLinkId, // Using order_id field for payment links
       user_id: paymentDetails.userId,
       amount: paymentDetails.amount,
       currency: paymentDetails.currency,
-      status: 'PENDING',
+      payment_status: 'PENDING' as PaymentStatus,
+      payment_date: new Date().toISOString(),
+      customer_email: paymentDetails.userEmail,
       metadata: paymentDetails.metadata as Json
     });
     
@@ -121,24 +126,22 @@ export const getUserTransactions = async (userId: string): Promise<TransactionDe
       .from('payments')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .order('payment_date', { ascending: false });
     if (error) throw error;
-    
-    // Convert Supabase data to TransactionDetails type
     const transactions: TransactionDetails[] = data?.map(item => ({
       id: item.id,
-      order_id: item.order_id || '',
-      payment_link_id: item.payment_link_id,
-      user_id: item.user_id,
-      amount: item.amount,
+      order_id: item.cashfree_order_id, // Map from existing DB column
+      payment_id: item.cashfree_payment_id, // Map from existing DB column
+      amount: Number(item.amount),
       currency: item.currency,
-      status: item.status as PaymentStatus,
+      payment_status: item.payment_status as PaymentStatus,
+      payment_date: item.payment_date,
+      customer_email: item.customer_email,
+      user_id: item.user_id,
       payment_method: item.payment_method,
-      created_at: item.created_at,
-      updated_at: item.updated_at,
+      country: item.country,
       metadata: item.metadata
     })) || [];
-    
     return transactions;
   } catch (error: any) {
     console.error('Error fetching user transactions:', error);
@@ -152,30 +155,27 @@ export const getTransactionByOrderId = async (orderId: string): Promise<Transact
     const { data, error } = await supabase
       .from('payments')
       .select('*')
-      .eq('order_id', orderId)
+      .eq('cashfree_order_id', orderId) // Using existing DB column
       .single();
     if (error) {
-      if (error.code === 'PGRST116') return null; // No rows found
+      if (error.code === 'PGRST116') return null;
       throw error;
     }
-    
     if (!data) return null;
-    
-    // Convert Supabase data to TransactionDetails type
     const transaction: TransactionDetails = {
       id: data.id,
-      order_id: data.order_id || '',
-      payment_link_id: data.payment_link_id,
-      user_id: data.user_id,
-      amount: data.amount,
+      order_id: data.cashfree_order_id, // Map from existing DB column
+      payment_id: data.cashfree_payment_id, // Map from existing DB column
+      amount: Number(data.amount),
       currency: data.currency,
-      status: data.status as PaymentStatus,
+      payment_status: data.payment_status as PaymentStatus,
+      payment_date: data.payment_date,
+      customer_email: data.customer_email,
+      user_id: data.user_id,
       payment_method: data.payment_method,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
+      country: data.country,
       metadata: data.metadata
     };
-    
     return transaction;
   } catch (error: any) {
     console.error('Error fetching transaction:', error);
@@ -186,28 +186,23 @@ export const getTransactionByOrderId = async (orderId: string): Promise<Transact
 // Check payment status
 export const checkPaymentStatus = async (orderId: string): Promise<Record<string, any>> => {
   try {
-    // Get transaction from database
     const transaction = await getTransactionByOrderId(orderId);
-    
     if (!transaction) {
       throw new Error('Transaction not found');
     }
-    
-    // Return mock order details
     return {
       orderId: transaction.order_id,
       orderAmount: transaction.amount,
       orderCurrency: transaction.currency,
-      orderStatus: transaction.status,
+      orderStatus: transaction.payment_status,
       paymentDetails: {
         paymentMethod: transaction.payment_method || 'CARD',
-        paymentTime: transaction.updated_at
+        paymentTime: transaction.payment_date
       },
       customerDetails: {
         customerId: transaction.user_id
       },
-      createdAt: transaction.created_at,
-      updatedAt: transaction.updated_at
+      createdAt: transaction.payment_date
     };
   } catch (error: any) {
     console.error('Error checking payment status:', error);
@@ -218,30 +213,34 @@ export const checkPaymentStatus = async (orderId: string): Promise<Record<string
 // Helper function to store transaction in database
 const storeTransaction = async (transactionData: {
   order_id?: string;
-  payment_link_id?: string;
-  user_id: string;
+  payment_id?: string;
   amount: number;
   currency: string;
-  status: PaymentStatus;
+  payment_status: PaymentStatus;
+  payment_date?: string;
+  customer_email?: string;
+  user_id?: string;
   payment_method?: string;
+  country?: string;
   metadata?: Json;
 }) => {
   try {
     const { error } = await supabase
       .from('payments')
       .insert({
-        order_id: transactionData.order_id,
-        payment_link_id: transactionData.payment_link_id,
-        user_id: transactionData.user_id,
+        cashfree_order_id: transactionData.order_id, // Using existing DB column for compatibility
+        cashfree_payment_id: transactionData.payment_id, // Using existing DB column for compatibility
         amount: transactionData.amount,
         currency: transactionData.currency,
-        status: transactionData.status,
+        payment_status: transactionData.payment_status,
+        payment_date: transactionData.payment_date || new Date().toISOString(),
+        customer_email: transactionData.customer_email,
+        user_id: transactionData.user_id,
         payment_method: transactionData.payment_method,
+        country: transactionData.country,
         metadata: transactionData.metadata
       });
-    
     if (error) throw error;
-    
     return true;
   } catch (error: any) {
     console.error('Error storing transaction:', error);
@@ -255,19 +254,20 @@ export const updatePaymentStatus = async (orderId: string, status: PaymentStatus
     const { error } = await supabase
       .from('payments')
       .update({ 
-        status,
-        updated_at: new Date().toISOString()
+        payment_status: status,
+        payment_date: new Date().toISOString()
       })
-      .eq('order_id', orderId);
-    
+      .eq('cashfree_order_id', orderId); // Using existing DB column
     if (error) throw error;
-    
     return true;
   } catch (error: any) {
     console.error('Error updating payment status:', error);
     throw error;
   }
 };
+
+// Note: The database still uses the original column names (cashfree_order_id, cashfree_payment_id)
+// for compatibility, but the application code uses generic names (order_id, payment_id).
 
 // Bonus: How to generate Supabase types via CLI
 // Run the following command in your terminal (replace <your_project_id> with your actual Supabase project ID):

@@ -9,7 +9,7 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      cashfree_transactions: {
+      payment_transactions: { // Original table name kept for compatibility
         Row: {
           amount: number
           created_at: string
@@ -69,7 +69,7 @@ export interface Database {
         }
         Insert: {
           amount: number
-          cashfree_order_id?: string | null
+          order_id?: string | null
           created_at?: string
           currency?: string
           id?: string
@@ -81,7 +81,7 @@ export interface Database {
         }
         Update: {
           amount?: number
-          cashfree_order_id?: string | null
+          order_id?: string | null
           created_at?: string
           currency?: string
           id?: string
@@ -309,4 +309,5 @@ export const Constants = {
   },
 } as const
 
-// Cashfree-related types removed. Cleaned up for generic payment support.
+// Note: Database column and table names still use legacy naming for compatibility,
+// but application code uses generic payment identifiers.

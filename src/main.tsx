@@ -7,8 +7,5 @@ import './index.css';
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Failed to find the root element");
 
-createRoot(rootElement).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+// Render without StrictMode to avoid potential issues
+createRoot(rootElement).render(<App />);

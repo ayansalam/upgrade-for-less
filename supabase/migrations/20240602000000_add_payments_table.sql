@@ -1,4 +1,6 @@
 -- Migration: Add payments table for generic payment integration (supports INR, USD, etc.)
+-- Note: Column names 'cashfree_order_id' and 'cashfree_payment_id' are kept for compatibility
+-- but are now used as generic payment identifiers (order_id and payment_id in application code)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS payments (
