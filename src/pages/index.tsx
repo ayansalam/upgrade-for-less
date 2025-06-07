@@ -119,111 +119,63 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
-      <div className="bg-red-100 p-4 text-center text-lg font-bold">🚨 Hello from updated Homepage</div>
-      <Navbar />
+      {/* Hero Section */}
+      <section className="w-full py-20 md:py-32 bg-gradient-to-br from-primary/5 to-primary/10 flex flex-col items-center justify-center text-center">
+        <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
+          Upgrade for Less – Best Deals on Software
+        </h1>
+        <p className="text-xl text-gray-600 mb-8 max-w-xl mx-auto">
+          Save big on premium software tools every month
+        </p>
+        <button className="px-8 py-3 bg-primary text-white rounded-lg shadow hover:bg-primary/90 transition font-semibold text-lg">
+          Browse Deals
+        </button>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-20 px-4 bg-white">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Plans & Pricing</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Choose the plan that fits your needs. Simple, transparent pricing for every stage of your business.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Free Plan */}
+            <div className="bg-gray-50 rounded-xl p-8 shadow border border-gray-100 flex flex-col items-center">
+              <h3 className="font-bold text-2xl mb-2">Free</h3>
+              <p className="text-3xl font-bold text-primary mb-4">₹0<span className="text-base font-normal text-gray-500">/mo</span></p>
+              <ul className="text-gray-600 mb-6 space-y-2 text-center">
+                <li>✔️ Limited access</li>
+              </ul>
+              <button className="w-full bg-primary/10 text-primary hover:bg-primary/20 rounded-lg py-2 font-semibold">Get Started</button>
+            </div>
+            {/* Pro Plan */}
+            <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-primary flex flex-col items-center scale-105">
+              <h3 className="font-bold text-2xl mb-2">Pro</h3>
+              <p className="text-3xl font-bold text-primary mb-4">₹499<span className="text-base font-normal text-gray-500">/mo</span></p>
+              <ul className="text-gray-600 mb-6 space-y-2 text-center">
+                <li>✔️ Full access</li>
+                <li>✔️ Updates</li>
+              </ul>
+              <button className="w-full bg-primary text-white hover:bg-primary/90 rounded-lg py-2 font-semibold">Upgrade</button>
+            </div>
+            {/* Business Plan */}
+            <div className="bg-gray-50 rounded-xl p-8 shadow border border-gray-100 flex flex-col items-center">
+              <h3 className="font-bold text-2xl mb-2">Business</h3>
+              <p className="text-3xl font-bold text-primary mb-4">₹1,999<span className="text-base font-normal text-gray-500">/mo</span></p>
+              <ul className="text-gray-600 mb-6 space-y-2 text-center">
+                <li>✔️ Team access</li>
+                <li>✔️ Support</li>
+              </ul>
+              <button className="w-full bg-primary/10 text-primary hover:bg-primary/20 rounded-lg py-2 font-semibold">Contact Sales</button>
+            </div>
+          </div>
+        </div>
+      </section>
       
       <main>
-        {/* Hero Section with Glassmorphism */}
-        <section className="relative py-20 md:py-32 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 z-0"></div>
-          
-          {/* Decorative elements */}
-          <div className="absolute top-20 left-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl"></div>
-          
-          <div className="container mx-auto max-w-6xl px-4 relative z-10">
-            <motion.div 
-              initial="hidden"
-              animate="visible"
-              variants={staggerContainer}
-              className="text-center max-w-3xl mx-auto"
-            >
-              <motion.div variants={fadeIn} className="inline-block mb-3 bg-primary/10 px-4 py-1 rounded-full">
-                <span className="text-primary font-medium flex items-center">
-                  <Sparkles className="h-4 w-4 mr-2" /> AI-Powered Pricing Optimization
-                </span>
-              </motion.div>
-              
-              <motion.h1 
-                variants={fadeIn} 
-                className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600"
-              >
-                Upgrade for Less – Best Deals on Software 🔥
-              </motion.h1>
-              
-              <motion.p variants={fadeIn} className="text-xl text-gray-600 mb-8">
-                Transform your SaaS pricing strategy with intelligent AI recommendations that boost conversions and maximize revenue.
-              </motion.p>
-              
-              <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
-                  className="bg-primary hover:bg-primary/90 shadow-lg"
-                  onClick={() => {
-                    if (!user) {
-                      setShowAuthModal(true);
-                    } else {
-                      window.location.href = '/dashboard';
-                    }
-                  }}
-                >
-                  Try Now <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button asChild variant="outline" size="lg" className="border-primary text-primary hover:bg-primary/5">
-                  <Link to="/features">See How It Works</Link>
-                </Button>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-        
-        {/* Pricing Plans Section */}
-        <section className="py-20 px-4 bg-white">
-          <div className="container mx-auto max-w-6xl">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Plans & Pricing</h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Choose the plan that fits your needs. Simple, transparent pricing for every stage of your business.
-              </p>
-            </div>
-            <div className="grid md:grid-cols-3 gap-8">
-              {/* Free Plan */}
-              <div className="bg-gray-50 rounded-xl p-8 shadow border border-gray-100 flex flex-col items-center">
-                <h3 className="font-bold text-2xl mb-2">Free</h3>
-                <p className="text-3xl font-bold text-primary mb-4">$0<span className="text-base font-normal text-gray-500">/mo</span></p>
-                <ul className="text-gray-600 mb-6 space-y-2 text-center">
-                  <li>✔️ Basic AI suggestions</li>
-                  <li>✔️ Community support</li>
-                  <li>✔️ 1 project</li>
-                </ul>
-                <Button className="w-full bg-primary/10 text-primary hover:bg-primary/20">Get Started</Button>
-              </div>
-              {/* Pro Plan */}
-              <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-primary flex flex-col items-center scale-105">
-                <h3 className="font-bold text-2xl mb-2">Pro</h3>
-                <p className="text-3xl font-bold text-primary mb-4">$49<span className="text-base font-normal text-gray-500">/mo</span></p>
-                <ul className="text-gray-600 mb-6 space-y-2 text-center">
-                  <li>✔️ Advanced AI suggestions</li>
-                  <li>✔️ Email support</li>
-                  <li>✔️ Up to 10 projects</li>
-                </ul>
-                <Button className="w-full bg-primary text-white hover:bg-primary/90">Upgrade</Button>
-              </div>
-              {/* Business Plan */}
-              <div className="bg-gray-50 rounded-xl p-8 shadow border border-gray-100 flex flex-col items-center">
-                <h3 className="font-bold text-2xl mb-2">Business</h3>
-                <p className="text-3xl font-bold text-primary mb-4">$199<span className="text-base font-normal text-gray-500">/mo</span></p>
-                <ul className="text-gray-600 mb-6 space-y-2 text-center">
-                  <li>✔️ All Pro features</li>
-                  <li>✔️ Dedicated support</li>
-                  <li>✔️ Unlimited projects</li>
-                </ul>
-                <Button className="w-full bg-primary/10 text-primary hover:bg-primary/20">Contact Sales</Button>
-              </div>
-            </div>
-          </div>
-        </section>
-        
         {/* AI Pricing Suggestion Feature */}
         <section className="py-20 px-4 bg-gradient-to-br from-gray-50 to-gray-100">
           <div className="container mx-auto max-w-6xl">
