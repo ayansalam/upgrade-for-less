@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -174,6 +173,53 @@ const Index = () => {
                 </Button>
               </motion.div>
             </motion.div>
+          </div>
+        </section>
+        
+        {/* Pricing Plans Section */}
+        <section className="py-20 px-4 bg-white">
+          <div className="container mx-auto max-w-6xl">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Plans & Pricing</h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Choose the plan that fits your needs. Simple, transparent pricing for every stage of your business.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Free Plan */}
+              <div className="bg-gray-50 rounded-xl p-8 shadow border border-gray-100 flex flex-col items-center">
+                <h3 className="font-bold text-2xl mb-2">Free</h3>
+                <p className="text-3xl font-bold text-primary mb-4">$0<span className="text-base font-normal text-gray-500">/mo</span></p>
+                <ul className="text-gray-600 mb-6 space-y-2 text-center">
+                  <li>✔️ Basic AI suggestions</li>
+                  <li>✔️ Community support</li>
+                  <li>✔️ 1 project</li>
+                </ul>
+                <Button className="w-full bg-primary/10 text-primary hover:bg-primary/20">Get Started</Button>
+              </div>
+              {/* Pro Plan */}
+              <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-primary flex flex-col items-center scale-105">
+                <h3 className="font-bold text-2xl mb-2">Pro</h3>
+                <p className="text-3xl font-bold text-primary mb-4">$49<span className="text-base font-normal text-gray-500">/mo</span></p>
+                <ul className="text-gray-600 mb-6 space-y-2 text-center">
+                  <li>✔️ Advanced AI suggestions</li>
+                  <li>✔️ Email support</li>
+                  <li>✔️ Up to 10 projects</li>
+                </ul>
+                <Button className="w-full bg-primary text-white hover:bg-primary/90">Upgrade</Button>
+              </div>
+              {/* Business Plan */}
+              <div className="bg-gray-50 rounded-xl p-8 shadow border border-gray-100 flex flex-col items-center">
+                <h3 className="font-bold text-2xl mb-2">Business</h3>
+                <p className="text-3xl font-bold text-primary mb-4">$199<span className="text-base font-normal text-gray-500">/mo</span></p>
+                <ul className="text-gray-600 mb-6 space-y-2 text-center">
+                  <li>✔️ All Pro features</li>
+                  <li>✔️ Dedicated support</li>
+                  <li>✔️ Unlimited projects</li>
+                </ul>
+                <Button className="w-full bg-primary/10 text-primary hover:bg-primary/20">Contact Sales</Button>
+              </div>
+            </div>
           </div>
         </section>
         
@@ -375,7 +421,7 @@ const Index = () => {
                     <div>
                       <p className="text-sm text-gray-500 mb-1">AI Suggested Price</p>
                       <div className="flex items-center">
-                        {demoProduct.suggestedPrice ? (
+                        {demoProduct.suggestedPrice > 0 ? (
                           <p className="font-bold text-2xl text-primary">${demoProduct.suggestedPrice.toFixed(2)}</p>
                         ) : (
                           <div className="flex items-center">
