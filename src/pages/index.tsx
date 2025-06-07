@@ -120,14 +120,14 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* Hero Section */}
-      <section className="w-full py-20 md:py-32 bg-gradient-to-br from-primary/5 to-primary/10 flex flex-col items-center justify-center text-center">
-        <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
-          Upgrade for Less – Best Deals on Software
+      <section className="text-center mb-16">
+        <h1 className="text-4xl font-bold mb-4">
+          Welcome to Upgrade for Less! 🔥
         </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-xl mx-auto">
+        <p className="text-lg mb-6">
           Save big on premium software tools every month
         </p>
-        <button className="px-8 py-3 bg-primary text-white rounded-lg shadow hover:bg-primary/90 transition font-semibold text-lg">
+        <button className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition">
           Browse Deals
         </button>
       </section>
