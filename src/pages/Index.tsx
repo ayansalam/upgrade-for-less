@@ -147,7 +147,7 @@ const Index = () => {
                 variants={fadeIn} 
                 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600"
               >
-                Upgrade for Less – Best Deals on Software
+                Upgrade for Less – Best Deals on Software 🔥
               </motion.h1>
               
               <motion.p variants={fadeIn} className="text-xl text-gray-600 mb-8">
