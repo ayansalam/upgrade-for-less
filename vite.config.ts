@@ -4,22 +4,17 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  define: {
-    // Payment gateway environment variables
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    outDir: 'dist'
   },
   server: {
-    port: 5173,
-    host: true, // Listen on all local IPs
+    host: true
   },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
-}));
+});
