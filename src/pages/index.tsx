@@ -1,13 +1,25 @@
 import { useState, useEffect, useRef } from "react";
-import Navbar from "@/components/Navbar";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, Check, Brain, Sparkles, Zap, BarChart, Users, Shield, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { AIPricingSuggestionDemo } from "@/components/AIPricingSuggestionDemo";
-import { useAuth } from "@/contexts/AuthContext";
+import { 
+  ArrowRight, 
+  Brain, 
+  Sparkles, 
+  Zap, 
+  BarChart, 
+  Users, 
+  Shield, 
+  ChevronLeft, 
+  ChevronRight, 
+  ChevronDown 
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { AuthModal } from "@/components/AuthModal";
+import { useAuth } from "@/contexts/AuthContext";
+import { AIPricingSuggestionDemo } from "@/components/AIPricingSuggestionDemo";
+import Navbar from "@/components/Navbar";
 
 const Index = () => {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
@@ -371,7 +383,7 @@ const Index = () => {
                       <p className="font-medium text-lg">${demoProduct.basePrice.toFixed(2)}</p>
                     </div>
                     
-                    <div>
+                    <div> 
                       <p className="text-sm text-gray-500 mb-1">AI Suggested Price</p>
                       <div className="flex items-center">
                         {demoProduct.suggestedPrice > 0 ? (

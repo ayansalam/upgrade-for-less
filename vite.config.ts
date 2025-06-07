@@ -9,8 +9,8 @@ export default defineConfig(({ mode }) => ({
     // Payment gateway environment variables
   },
   server: {
-    port: 8081,
-    host: true, // Listen on all addresses, including network
+    port: 5173,
+    host: true, // Listen on all local IPs
   },
   plugins: [
     react(),
