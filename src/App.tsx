@@ -1,6 +1,7 @@
 import './index.css'; // ✅ Tailwind styles applied
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
+// import { EnvTest } from '@/components/EnvTest';
 
 // Page imports
 import Index from "./pages/index";
@@ -25,6 +26,7 @@ function App() {
   return (
     <>
       <Navbar />
+      {/* Removed EnvTest component */}
       <Routes>
         {/* Main routes */}
         <Route path="/" element={<Index />} />
@@ -35,7 +37,7 @@ function App() {
         
         {/* Auth & Account */}
         <Route path="/auth" element={<Auth />} />
-        <Route path="/account" element={<AccountSettings />} />
+        <Route path="/account-settings" element={<AccountSettings />} />
         
         {/* Payment routes */}
         <Route path="/checkout" element={<Checkout />} />

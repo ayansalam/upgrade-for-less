@@ -1,5 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
+import { PaymentRecord, RefundRequest, RefundResponse } from "@/types/payment";
+import { Database } from "@/types/supabase";
 
 /**
  * Payment Service
@@ -36,6 +38,8 @@ export interface TransactionDetails {
   country?: string;
   metadata?: Json;
 }
+
+type PaymentRow = Database['public']['Tables']['payments']['Row'];
 
 // Create a payment checkout session
 export const createPaymentCheckout = async (paymentDetails: PaymentDetails): Promise<Record<string, any>> => {
@@ -120,68 +124,81 @@ export const createPaymentLink = async (paymentDetails: PaymentDetails): Promise
 };
 
 // Get user's transaction history
-export const getUserTransactions = async (userId: string): Promise<TransactionDetails[]> => {
+export async function getUserTransactions(userId: string): Promise<PaymentRecord[]> {
   try {
     const { data, error } = await supabase
       .from('payments')
       .select('*')
       .eq('user_id', userId)
-      .order('payment_date', { ascending: false });
+      .order('created_at', { ascending: false });
+
     if (error) throw error;
-    const transactions: TransactionDetails[] = data?.map(item => ({
-      id: item.id,
-      order_id: item.cashfree_order_id, // Map from existing DB column
-      payment_id: item.cashfree_payment_id, // Map from existing DB column
-      amount: Number(item.amount),
-      currency: item.currency,
-      payment_status: item.payment_status as PaymentStatus,
-      payment_date: item.payment_date,
-      customer_email: item.customer_email,
-      user_id: item.user_id,
-      payment_method: item.payment_method,
-      country: item.country,
-      metadata: item.metadata
-    })) || [];
-    return transactions;
-  } catch (error: any) {
+
+    // Map database rows to PaymentRecord type
+    return (data || []).map((row) => ({
+      id: row.id,
+      payment_id: row.payment_id,
+      order_id: row.order_id,
+      email: row.email,
+      amount: row.amount,
+      currency: row.currency,
+      status: row.status as PaymentRecord['status'],
+      payment_method: row.payment_method,
+      created_at: row.created_at,
+      refunded_at: row.refunded_at || null,
+      refund_id: row.refund_id || null,
+      refund_amount: row.refund_amount || null,
+      refund_status: row.refund_status || null,
+      refund_notes: row.refund_notes || null,
+      metadata: row.metadata || null,
+      user_id: row.user_id
+    }));
+  } catch (error) {
     console.error('Error fetching user transactions:', error);
     throw error;
   }
-};
+}
 
 // Get transaction details by order ID
-export const getTransactionByOrderId = async (orderId: string): Promise<TransactionDetails | null> => {
+export async function getTransactionByOrderId(orderId: string): Promise<PaymentRecord | null> {
   try {
     const { data, error } = await supabase
       .from('payments')
       .select('*')
-      .eq('cashfree_order_id', orderId) // Using existing DB column
+      .eq('order_id', orderId)
       .single();
+
     if (error) {
       if (error.code === 'PGRST116') return null;
       throw error;
     }
+
     if (!data) return null;
-    const transaction: TransactionDetails = {
+
+    // Map database row to PaymentRecord type
+    return {
       id: data.id,
-      order_id: data.cashfree_order_id, // Map from existing DB column
-      payment_id: data.cashfree_payment_id, // Map from existing DB column
-      amount: Number(data.amount),
+      payment_id: data.payment_id,
+      order_id: data.order_id,
+      email: data.email,
+      amount: data.amount,
       currency: data.currency,
-      payment_status: data.payment_status as PaymentStatus,
-      payment_date: data.payment_date,
-      customer_email: data.customer_email,
-      user_id: data.user_id,
+      status: data.status as PaymentRecord['status'],
       payment_method: data.payment_method,
-      country: data.country,
-      metadata: data.metadata
+      created_at: data.created_at,
+      refunded_at: data.refunded_at || null,
+      refund_id: data.refund_id || null,
+      refund_amount: data.refund_amount || null,
+      refund_status: data.refund_status || null,
+      refund_notes: data.refund_notes || null,
+      metadata: data.metadata || null,
+      user_id: data.user_id
     };
-    return transaction;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching transaction:', error);
     throw error;
   }
-};
+}
 
 // Check payment status
 export const checkPaymentStatus = async (orderId: string): Promise<Record<string, any>> => {
@@ -194,15 +211,15 @@ export const checkPaymentStatus = async (orderId: string): Promise<Record<string
       orderId: transaction.order_id,
       orderAmount: transaction.amount,
       orderCurrency: transaction.currency,
-      orderStatus: transaction.payment_status,
+      orderStatus: transaction.status,
       paymentDetails: {
         paymentMethod: transaction.payment_method || 'CARD',
-        paymentTime: transaction.payment_date
+        paymentTime: transaction.created_at
       },
       customerDetails: {
-        customerId: transaction.user_id
+        customerId: transaction.id
       },
-      createdAt: transaction.payment_date
+      createdAt: transaction.created_at
     };
   } catch (error: any) {
     console.error('Error checking payment status:', error);
@@ -272,3 +289,25 @@ export const updatePaymentStatus = async (orderId: string, status: PaymentStatus
 // Bonus: How to generate Supabase types via CLI
 // Run the following command in your terminal (replace <your_project_id> with your actual Supabase project ID):
 // supabase gen types typescript --project-id <your_project_id>
+
+export async function initiateRefund(request: RefundRequest): Promise<RefundResponse> {
+  try {
+    const response = await fetch('/api/payment/refund', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to process refund');
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Error initiating refund:', error);
+    throw error;
+  }
+}

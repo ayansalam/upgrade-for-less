@@ -1,3 +1,4 @@
+@import url('https://rsms.me/inter/inter.css');
 
 @tailwind base;
 @tailwind components;
@@ -16,6 +17,17 @@
 
     --primary: 260 84% 63.3%;
     --primary-foreground: 210 40% 98%;
+    --primary-50: 260 100% 97%;
+    --primary-100: 260 100% 94%;
+    --primary-200: 260 95% 90%;
+    --primary-300: 260 90% 80%;
+    --primary-400: 260 85% 70%;
+    --primary-500: 260 84% 63.3%;
+    --primary-600: 260 75% 55%;
+    --primary-700: 260 70% 45%;
+    --primary-800: 260 65% 35%;
+    --primary-900: 260 60% 25%;
+    --primary-950: 260 55% 15%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -33,7 +45,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -62,8 +74,19 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 260 84% 63.3%;
+    --primary-foreground: 210 40% 98%;
+    --primary-50: 260 55% 15%;
+    --primary-100: 260 60% 25%;
+    --primary-200: 260 65% 35%;
+    --primary-300: 260 70% 45%;
+    --primary-400: 260 75% 55%;
+    --primary-500: 260 84% 63.3%;
+    --primary-600: 260 85% 70%;
+    --primary-700: 260 90% 80%;
+    --primary-800: 260 95% 90%;
+    --primary-900: 260 100% 94%;
+    --primary-950: 260 100% 97%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -97,7 +120,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03", "cv04";
   }
 
   @keyframes fade-in {

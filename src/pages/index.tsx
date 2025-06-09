@@ -1,679 +1,406 @@
-import { useState, useEffect, useRef } from "react";
+import React from 'react';
+import PricingSection from '@/pages/PricingSection';
+import { motion } from 'framer-motion';
+import { Zap, Shield, CreditCard, ArrowRight, CheckCircle, ChevronRight, BarChart, Lock } from 'lucide-react';
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { useInView } from "react-intersection-observer";
-import { 
-  ArrowRight, 
-  Brain, 
-  Sparkles, 
-  Zap, 
-  BarChart, 
-  Users, 
-  Shield, 
-  ChevronLeft, 
-  ChevronRight, 
-  ChevronDown 
-} from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { AuthModal } from "@/components/AuthModal";
-import { useAuth } from "@/contexts/AuthContext";
-import { AIPricingSuggestionDemo } from "@/components/AIPricingSuggestionDemo";
-import Navbar from "@/components/Navbar";
+const features = [
+  {
+    title: "Smart Upgrade Analysis",
+    description: "Get AI-powered recommendations on when and how to upgrade your software and systems.",
+    icon: <ChevronRight className="h-6 w-6" />,
+  },
+  {
+    title: "Cost Optimization",
+    description: "Save up to 40% on your upgrade costs with our intelligent pricing strategies.",
+    icon: <ChevronRight className="h-6 w-6" />,
+  },
+  {
+    title: "Real-time Monitoring",
+    description: "Track your upgrade progress and costs in real-time with detailed analytics.",
+    icon: <ChevronRight className="h-6 w-6" />,
+  },
+] as const;
 
-const Index = () => {
-  const [activeTestimonial, setActiveTestimonial] = useState(0);
-  const [activeFaq, setActiveFaq] = useState(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const { user } = useAuth();
-  
-  // Testimonials data
-  const testimonials = [
-    {
-      name: "Sarah Johnson",
-      role: "Product Manager at TechFlow",
-      content: "The AI pricing suggestions have transformed our conversion rates. We've seen a 32% increase in premium plan signups since implementation.",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80"
-    },
-    {
-      name: "Michael Chen",
-      role: "CEO at DataSphere",
-      content: "UpgradeForLess helped us optimize our pricing strategy in ways we never thought possible. Our customer lifetime value has increased by 40%.",
-      avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80"
-    },
-    {
-      name: "Emily Rodriguez",
-      role: "Marketing Director at CloudNine",
-      content: "The transparency in pricing has significantly reduced our churn rate. Our customers appreciate the clear value proposition.",
-      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80"
+const testimonials = [
+  {
+    content: "UpgradeForLess has helped us save over 35% on our annual software upgrade costs. The platform is intuitive and the recommendations are spot-on.",
+    name: "Sarah Johnson",
+    role: "CTO",
+    company: "TechCorp",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+  },
+  {
+    content: "The AI-powered recommendations have been a game-changer for our upgrade strategy. We're now much more efficient with our IT budget.",
+    name: "Michael Chen",
+    role: "IT Director",
+    company: "GrowthCo",
+    avatar: "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+  },
+  {
+    content: "The real-time monitoring and cost tracking features have given us unprecedented visibility into our upgrade spending.",
+    name: "Emily Rodriguez",
+    role: "Operations Manager",
+    company: "ScaleUp",
+    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+  },
+] as const;
+
+const fadeIn = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5 }
+};
+
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.2
     }
-  ];
-  
-  // Auto-rotate testimonials with proper cleanup
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
-    
-    // Clear interval on component unmount
-    return () => clearInterval(interval);
-  }, [testimonials.length]);
-  
-  // Demo form state
-  const [demoProduct, setDemoProduct] = useState({
-    name: "Premium SaaS Plan",
-    basePrice: 49.99,
-    suggestedPrice: 0
-  });
-  
-  // Calculate AI suggestion when component mounts
-  useEffect(() => {
-    // Simulate AI calculation
-    setTimeout(() => {
-      setDemoProduct(prev => ({
-        ...prev,
-        suggestedPrice: 39.99
-      }));
-    }, 1500);
-  }, []);
-  
-  // FAQ data
-  const faqs = [
-    {
-      question: "How does the AI pricing suggestion work?",
-      answer: "Our AI analyzes market trends, customer behavior, and competitive pricing to suggest optimal price points that maximize conversions while maintaining profitability. The system continuously learns from real-world data to improve its suggestions over time."
-    },
-    {
-      question: "Can I integrate this with my existing payment system?",
-      answer: "Yes! UpgradeForLess is designed to work seamlessly with all major payment processors and subscription management systems. Our API and pre-built integrations make implementation straightforward."
-    },
-    {
-      question: "How long does it take to see results?",
-      answer: "Most customers see significant improvements in conversion rates within the first 30 days. The AI continues to optimize suggestions over time, leading to even better results as more data is collected."
-    },
-    {
-      question: "Is there a free trial available?",
-      answer: "Absolutely! We offer a 14-day free trial with full access to all features. No credit card required to get started."
-    }
-  ];
-  
-  // Animation variants
-  const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  }
+};
+
+const workflowSteps = [
+  {
+    step: "1",
+    title: "Choose a Plan",
+    description: "Select from our flexible plans designed to fit your budget and business goals. From startups to enterprises, we have the right upgrade package for you.",
+    icon: <CreditCard className="w-12 h-12 text-primary" />,
+    image: "https://illustrations.popsy.co/purple/product-launch.svg",
+  },
+  {
+    step: "2",
+    title: "Pay with Razorpay",
+    description: "Make secure payments using Razorpay's trusted platform. Your transactions are protected with bank-grade security and encryption.",
+    icon: <Lock className="w-12 h-12 text-primary" />,
+    image: "/images/illustrations/secure-payment.svg",
+  },
+  {
+    step: "3",
+    title: "Get Instant Access",
+    description: "Access your premium tools and upgrades immediately after payment. No waiting period - start optimizing your software costs right away.",
+    icon: <Zap className="w-12 h-12 text-primary" />,
+    image: "https://illustrations.popsy.co/purple/remote-work.svg",
+  },
+  {
+    step: "4",
+    title: "Grow Smarter",
+    description: "Save up to 40% on your software costs while accessing premium features. Scale your business without breaking the bank.",
+    icon: <BarChart className="w-12 h-12 text-primary" />,
+    image: "/images/illustrations/growth.svg",
+  },
+];
+
+export default function LandingPage() {
+  const scrollToPricing = (e: React.MouseEvent) => {
+    e.preventDefault();
+    document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
   };
-  
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2
-      }
-    }
-  };
-  
-  // Intersection observer hooks for scroll animations
-  const [processRef, processInView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1
-  });
-  
-  const [demoRef, demoInView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1
-  });
-  
-  const [techRef, techInView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1
-  });
-  
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="text-center mb-16">
-        <h1 className="text-4xl font-bold mb-4">
-          Welcome to Upgrade for Less! 🔥
-        </h1>
-        <p className="text-lg mb-6">
-          Save big on premium software tools every month
-        </p>
-        <button className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition">
-          Browse Deals
-        </button>
-      </section>
-
-      {/* Pricing Section */}
-      <section className="py-20 px-4 bg-white">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Plans & Pricing</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Choose the plan that fits your needs. Simple, transparent pricing for every stage of your business.
+      <section className="relative overflow-hidden bg-gradient-to-b from-purple-50 to-white pt-16 md:pt-24 lg:pt-32">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl md:text-7xl">
+              <span className="block text-primary">Upgrade Smarter,</span>
+              <span className="block">Pay Less</span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 sm:text-xl">
+              Powerful tools and affordable plans built for modern teams. Save money while getting the best upgrades for your business.
             </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Free Plan */}
-            <div className="bg-gray-50 rounded-xl p-8 shadow border border-gray-100 flex flex-col items-center">
-              <h3 className="font-bold text-2xl mb-2">Free</h3>
-              <p className="text-3xl font-bold text-primary mb-4">₹0<span className="text-base font-normal text-gray-500">/mo</span></p>
-              <ul className="text-gray-600 mb-6 space-y-2 text-center">
-                <li>✔️ Limited access</li>
-              </ul>
-              <button className="w-full bg-primary/10 text-primary hover:bg-primary/20 rounded-lg py-2 font-semibold">Get Started</button>
+            <div className="mt-10 flex items-center justify-center gap-x-6">
+              <Link
+                to="/auth"
+                className="rounded-full bg-primary px-8 py-3 text-lg font-semibold text-white shadow-lg hover:bg-primary/90 transition-all duration-200"
+              >
+                Get Started Free
+                <ArrowRight className="ml-2 inline-block h-5 w-5" />
+              </Link>
+              <Link
+                to="/pricing"
+                className="text-lg font-semibold text-gray-700 hover:text-primary"
+              >
+                View Pricing <span aria-hidden="true">→</span>
+              </Link>
             </div>
-            {/* Pro Plan */}
-            <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-primary flex flex-col items-center scale-105">
-              <h3 className="font-bold text-2xl mb-2">Pro</h3>
-              <p className="text-3xl font-bold text-primary mb-4">₹499<span className="text-base font-normal text-gray-500">/mo</span></p>
-              <ul className="text-gray-600 mb-6 space-y-2 text-center">
-                <li>✔️ Full access</li>
-                <li>✔️ Updates</li>
-              </ul>
-              <button className="w-full bg-primary text-white hover:bg-primary/90 rounded-lg py-2 font-semibold">Upgrade</button>
-            </div>
-            {/* Business Plan */}
-            <div className="bg-gray-50 rounded-xl p-8 shadow border border-gray-100 flex flex-col items-center">
-              <h3 className="font-bold text-2xl mb-2">Business</h3>
-              <p className="text-3xl font-bold text-primary mb-4">₹1,999<span className="text-base font-normal text-gray-500">/mo</span></p>
-              <ul className="text-gray-600 mb-6 space-y-2 text-center">
-                <li>✔️ Team access</li>
-                <li>✔️ Support</li>
-              </ul>
-              <button className="w-full bg-primary/10 text-primary hover:bg-primary/20 rounded-lg py-2 font-semibold">Contact Sales</button>
-            </div>
+          </motion.div>
+        </div>
+        <div className="mt-16 bg-gradient-to-b from-primary/5 to-transparent py-8">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <motion.div 
+              className="grid grid-cols-2 gap-8 md:grid-cols-4"
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+            >
+              {['Trusted by 10,000+ companies', '99.9% Uptime', '24/7 Support', 'Free Forever Plan'].map((stat) => (
+                <motion.div 
+                  key={stat}
+                  variants={fadeIn}
+                  className="flex items-center justify-center text-sm font-medium text-gray-600"
+                >
+                  <CheckCircle className="mr-2 h-5 w-5 text-primary" />
+                  {stat}
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </div>
       </section>
-      
-      <main>
-        {/* AI Pricing Suggestion Feature */}
-        <section className="py-20 px-4 bg-gradient-to-br from-gray-50 to-gray-100">
-          <div className="container mx-auto max-w-6xl">
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <div className="inline-block mb-3 bg-primary/10 px-4 py-1 rounded-full">
-                <span className="text-primary font-medium flex items-center">
-                  <Sparkles className="h-4 w-4 mr-2" /> New Feature
-                </span>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">AI-Powered Pricing Suggestions</h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Optimize your pricing strategy with intelligent recommendations powered by AI.
-              </p>
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <AIPricingSuggestionDemo className="max-w-5xl mx-auto" />
-            </motion.div>
-          </div>
-        </section>
-        
-        {/* 3-Step Process with Scroll Animations */}
-        <section 
-          ref={processRef} 
-          className="py-20 px-4"
-        >
-          <div className="container mx-auto max-w-6xl">
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={processInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Our AI-powered platform makes optimizing your pricing strategy simple and effective.
-              </p>
-            </motion.div>
-            
-            <div className="grid md:grid-cols-3 gap-8 relative">
-              {/* Connecting line for desktop */}
-              <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/20 via-primary to-primary/20 transform -translate-y-1/2 z-0"></div>
-              
-              {/* Step 1 */}
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                animate={processInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="bg-white rounded-xl p-8 shadow-lg relative z-10 border border-gray-100 hover:shadow-xl transition-shadow duration-300"
-              >
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Brain className="h-8 w-8 text-primary" />
-                </div>
-                <img 
-                  src="https://images.unsplash.com/photo-1543286386-713bdd548da4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                  alt="Data Connection" 
-                  className="w-full h-40 object-cover rounded-lg mb-6 shadow-md"
-                />
-                <h3 className="font-bold text-2xl mb-4 text-center">1. Connect Your Data</h3>
-                <p className="text-gray-600 text-center">
-                  Integrate with your existing systems to provide our AI with the data it needs to understand your business.
-                </p>
-              </motion.div>
-              
-              {/* Step 2 */}
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                animate={processInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="bg-white rounded-xl p-8 shadow-lg relative z-10 border border-gray-100 hover:shadow-xl transition-shadow duration-300"
-              >
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Zap className="h-8 w-8 text-primary" />
-                </div>
-                <img 
-                  src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                  alt="AI Suggestions" 
-                  className="w-full h-40 object-cover rounded-lg mb-6 shadow-md"
-                />
-                <h3 className="font-bold text-2xl mb-4 text-center">2. Receive AI Suggestions</h3>
-                <p className="text-gray-600 text-center">
-                  Our advanced algorithms analyze your data and provide intelligent pricing recommendations.
-                </p>
-              </motion.div>
-              
-              {/* Step 3 */}
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                animate={processInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-                className="bg-white rounded-xl p-8 shadow-lg relative z-10 border border-gray-100 hover:shadow-xl transition-shadow duration-300"
-              >
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <BarChart className="h-8 w-8 text-primary" />
-                </div>
-                <img 
-                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                  alt="Growth Chart" 
-                  className="w-full h-40 object-cover rounded-lg mb-6 shadow-md"
-                />
-                <h3 className="font-bold text-2xl mb-4 text-center">3. Optimize & Grow</h3>
-                <p className="text-gray-600 text-center">
-                  Implement the suggestions and watch your conversion rates and revenue grow.
-                </p>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-        
-        {/* Live Demo Section with Form */}
-        <section 
-          ref={demoRef}
-          className="py-20 px-4 bg-gradient-to-br from-gray-50 to-gray-100"
-        >
-          <div className="container mx-auto max-w-6xl">
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={demoInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">See It In Action</h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Try our interactive demo to see how our AI generates pricing suggestions.
-              </p>
-            </motion.div>
-            
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <motion.div 
-                initial={{ opacity: 0, x: -30 }}
-                animate={demoInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
-                  <h3 className="text-2xl font-bold mb-6">AI Pricing Demo</h3>
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
-                      <input 
-                        type="text" 
-                        value={demoProduct.name}
-                        onChange={(e) => setDemoProduct({...demoProduct, name: e.target.value})}
-                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Current Price ($)</label>
-                      <input 
-                        type="number" 
-                        value={demoProduct.basePrice}
-                        onChange={(e) => setDemoProduct({...demoProduct, basePrice: parseFloat(e.target.value)})}
-                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-                      />
-                    </div>
-                    
-                    <Button className="w-full bg-primary hover:bg-primary/90">
-                      Generate AI Suggestion
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                initial={{ opacity: 0, x: 30 }}
-                animate={demoInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-                <div className="bg-gradient-to-br from-primary/5 to-primary/10 backdrop-blur-sm p-8 rounded-xl border border-primary/20 shadow-lg">
-                  <h3 className="text-2xl font-bold mb-6 flex items-center">
-                    <Sparkles className="h-5 w-5 mr-2 text-primary" /> 
-                    AI Suggestion Result
-                  </h3>
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <p className="text-sm text-gray-500 mb-1">Product</p>
-                      <p className="font-medium text-lg">{demoProduct.name}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm text-gray-500 mb-1">Current Price</p>
-                      <p className="font-medium text-lg">${demoProduct.basePrice.toFixed(2)}</p>
-                    </div>
-                    
-                    <div> 
-                      <p className="text-sm text-gray-500 mb-1">AI Suggested Price</p>
-                      <div className="flex items-center">
-                        {demoProduct.suggestedPrice > 0 ? (
-                          <p className="font-bold text-2xl text-primary">${demoProduct.suggestedPrice.toFixed(2)}</p>
-                        ) : (
-                          <div className="flex items-center">
-                            <div className="h-6 w-6 rounded-full border-2 border-primary border-t-transparent animate-spin mr-2"></div>
-                            <p className="text-gray-500">Calculating...</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {demoProduct.suggestedPrice > 0 && (
-                      <div className="bg-green-50 border border-green-100 rounded-md p-4">
-                        <p className="text-green-800 text-sm">
-                          <strong>AI Analysis:</strong> Based on market trends and customer behavior, we recommend a {((demoProduct.basePrice - demoProduct.suggestedPrice) / demoProduct.basePrice * 100).toFixed(0)}% discount to maximize conversions while maintaining profitability.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-        
-        {/* Technology Showcase with Fade-in Animations */}
-        <section 
-          ref={techRef}
-          className="py-20 px-4"
-        >
-          <div className="container mx-auto max-w-6xl">
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={techInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Powered by Advanced AI</h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Our platform leverages cutting-edge technologies to deliver accurate pricing recommendations.
-              </p>
-            </motion.div>
-            
-            <div className="grid md:grid-cols-3 gap-8">
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                animate={techInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="bg-white rounded-xl p-8 shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300"
-              >
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                  <Brain className="h-6 w-6 text-primary" />
-                </div>
-                <img 
-                  src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                  alt="Machine Learning" 
-                  className="w-full h-32 object-cover rounded-lg mb-6 shadow-md"
-                />
-                <h3 className="font-bold text-xl mb-3">Machine Learning</h3>
-                <p className="text-gray-600">
-                  Our algorithms continuously learn from market data and user behavior to improve pricing recommendations over time.
-                </p>
-              </motion.div>
-              
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                animate={techInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="bg-white rounded-xl p-8 shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300"
-              >
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <img 
-                  src="https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                  alt="Behavioral Analysis" 
-                  className="w-full h-32 object-cover rounded-lg mb-6 shadow-md"
-                />
-                <h3 className="font-bold text-xl mb-3">Behavioral Analysis</h3>
-                <p className="text-gray-600">
-                  We analyze how users interact with different pricing options to identify patterns that lead to higher conversion rates.
-                </p>
-              </motion.div>
-              
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                animate={techInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-                className="bg-white rounded-xl p-8 shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300"
-              >
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                  <Shield className="h-6 w-6 text-primary" />
-                </div>
-                <img 
-                  src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                  alt="Secure Integration" 
-                  className="w-full h-32 object-cover rounded-lg mb-6 shadow-md"
-                />
-                <h3 className="font-bold text-xl mb-3">Secure Integration</h3>
-                <p className="text-gray-600">
-                  Our platform integrates securely with your existing systems, ensuring data privacy and protection at every step.
-                </p>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-        
-        {/* Testimonial Carousel */}
-        <section className="py-20 px-4 bg-gradient-to-br from-primary/5 to-primary/10">
-          <div className="container mx-auto max-w-6xl">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Customers Say</h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Hear from businesses that have transformed their pricing strategy with our AI-powered platform.
-              </p>
-            </div>
-            
-            <div className="relative max-w-4xl mx-auto">
-              <div className="overflow-hidden rounded-xl bg-white shadow-lg border border-gray-100 p-8 md:p-12 relative min-h-[300px]">
-                {testimonials.map((testimonial, index) => (
-                  <motion.div 
-                    key={index}
-                    initial={{ opacity: 0, x: 50 }}
-                    animate={{ 
-                      opacity: activeTestimonial === index ? 1 : 0,
-                      x: activeTestimonial === index ? 0 : 50,
-                      zIndex: activeTestimonial === index ? 1 : 0
-                    }}
-                    transition={{ duration: 0.5, ease: "easeInOut" }}
-                    className={`absolute inset-0 p-8 md:p-12 ${activeTestimonial === index ? 'pointer-events-auto' : 'pointer-events-none'}`}
-                  >
-                    <div className="flex flex-col items-center text-center">
-                      <img 
-                        src={testimonial.avatar} 
-                        alt={testimonial.name} 
-                        className="w-20 h-20 rounded-full mb-6 border-2 border-primary/20 object-cover shadow-md"
-                      />
-                      <p className="text-xl italic mb-6 text-gray-700">"{testimonial.content}"</p>
-                      <h4 className="font-bold text-lg">{testimonial.name}</h4>
-                      <p className="text-gray-500">{testimonial.role}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-              
-              <div className="flex justify-center mt-8 space-x-4">
-                <button 
-                  onClick={() => setActiveTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length)}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  aria-label="Previous testimonial"
-                >
-                  <ChevronLeft className="h-5 w-5 text-gray-600" />
-                </button>
-                
-                <div className="flex items-center space-x-2">
-                  {testimonials.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setActiveTestimonial(index)}
-                      className={`w-3 h-3 rounded-full transition-all duration-300 ${activeTestimonial === index ? 'bg-primary scale-125' : 'bg-gray-300 hover:bg-gray-400'}`}
-                      aria-label={`View testimonial ${index + 1}`}
-                    />
-                  ))}
-                </div>
-                
-                <button 
-                  onClick={() => setActiveTestimonial((prev) => (prev + 1) % testimonials.length)}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  aria-label="Next testimonial"
-                >
-                  <ChevronRight className="h-5 w-5 text-gray-600" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-        
-        {/* FAQ Accordion */}
-        <section className="py-20 px-4">
-          <div className="container mx-auto max-w-4xl">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Find answers to common questions about our AI pricing platform.
-              </p>
-            </div>
-            
-            <div className="space-y-4">
-              {faqs.map((faq, index) => (
-                <div 
-                  key={index} 
-                  className="border border-gray-200 rounded-lg overflow-hidden"
-                >
-                  <button
-                    onClick={() => setActiveFaq(activeFaq === index ? null : index)}
-                    className="flex justify-between items-center w-full p-6 text-left bg-white hover:bg-gray-50 transition-colors"
-                  >
-                    <h3 className="font-semibold text-lg">{faq.question}</h3>
-                    <div className={`transform transition-transform ${activeFaq === index ? 'rotate-180' : ''}`}>
-                      <ChevronDown className="h-5 w-5" />
-                    </div>
-                  </button>
-                  <div 
-                    className={`overflow-hidden transition-all duration-300 ${activeFaq === index ? 'max-h-96 p-6 pt-0' : 'max-h-0'}`}
-                  >
-                    <p className="text-gray-600">{faq.answer}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-        
-        {/* CTA Section with Background Transition */}
-        <section className="py-20 px-4 bg-gradient-to-r from-primary to-blue-600 text-white">
-          <div className="container mx-auto max-w-4xl text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to transform your pricing strategy?</h2>
-            <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-              Join thousands of businesses using AI to optimize their pricing and boost conversions.
+
+      {/* Features Section */}
+      <section className="py-24 bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Everything you need to upgrade smarter
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Our platform provides all the tools you need to make informed upgrade decisions
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" variant="secondary" className="shadow-lg">
-                <Link to="/auth?tab=signup">Start Free Trial</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10">
-                <Link to="/pricing">View Pricing</Link>
-              </Button>
-            </div>
+          </motion.div>
+
+          <motion.div 
+            className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
+            {features.map((feature) => (
+              <motion.div
+                key={feature.title}
+                variants={fadeIn}
+                className="relative rounded-2xl border border-gray-200 bg-white p-8 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  {feature.icon}
+                </div>
+                <h3 className="mt-4 text-xl font-semibold text-gray-900">{feature.title}</h3>
+                <p className="mt-2 text-base text-gray-600">{feature.description}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center max-w-3xl mx-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
+              How Upgrade for Less Works
+            </h2>
+            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+              Get started in minutes with our simple four-step process
+            </p>
+          </motion.div>
+
+          <div className="mt-16 space-y-16">
+            {workflowSteps.map((step, index) => (
+              <motion.div
+                key={step.title}
+                className="relative"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <div className={`lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center ${
+                  index % 2 === 0 ? '' : 'lg:grid-flow-col-dense'
+                }`}>
+                  <div className={`lg:col-start-${index % 2 === 0 ? '1' : '2'}`}>
+                    <div className="relative">
+                      <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary mb-8">
+                        {step.icon}
+                      </span>
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                        {step.title}
+                      </h3>
+                      <p className="mt-3 text-lg text-gray-600 dark:text-gray-300">
+                        {step.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className={`mt-10 lg:mt-0 lg:col-start-${index % 2 === 0 ? '2' : '1'}`}>
+                    <div className="relative lg:pl-12">
+                      <div className="relative mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:px-0 lg:max-w-none">
+                        <div className="relative pt-64 pb-10 rounded-2xl shadow-xl overflow-hidden">
+                          <img
+                            className="absolute inset-0 h-full w-full object-cover"
+                            src={step.image}
+                            alt={step.title}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-primary/30 to-primary/0 mix-blend-multiply" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Connector Line (except for last item) */}
+                {index < workflowSteps.length - 1 && (
+                  <div className="absolute left-1/2 transform -translate-x-1/2 mt-8 w-px h-16 bg-gradient-to-b from-primary/50 to-transparent" />
+                )}
+              </motion.div>
+            ))}
           </div>
-        </section>
-      </main>
-      
-      {/* Auth Modal */}
-      <AuthModal 
-        isOpen={showAuthModal} 
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={() => window.location.href = '/dashboard'}
-      />
-      
+
+          {/* CTA Button */}
+          <motion.div 
+            className="mt-16 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Link
+              to="/auth"
+              className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-primary hover:bg-primary-600 transition-colors duration-200"
+            >
+              Get Started Now
+              <ArrowRight className="ml-2 -mr-1 h-5 w-5" />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-24 bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Loved by businesses worldwide
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Here's what our customers have to say about their experience
+            </p>
+          </motion.div>
+
+          <motion.div 
+            className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
+            {testimonials.map((testimonial) => (
+              <motion.div
+                key={testimonial.name}
+                variants={fadeIn}
+                className="relative rounded-2xl border border-gray-200 bg-white p-8 shadow-sm"
+              >
+                <div className="flex items-center gap-4">
+                  <img
+                    className="h-12 w-12 rounded-full object-cover"
+                    src={testimonial.avatar}
+                    alt={testimonial.name}
+                  />
+                  <div>
+                    <div className="font-medium text-gray-900">{testimonial.name}</div>
+                    <div className="text-sm text-gray-600">{testimonial.role} at {testimonial.company}</div>
+                  </div>
+                </div>
+                <p className="mt-6 text-base text-gray-600">{testimonial.content}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative overflow-hidden bg-primary py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Ready to start saving?
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-primary-50">
+              Join thousands of businesses already saving money with our platform
+            </p>
+            <div className="mt-8 flex justify-center">
+              <Link
+                to="/auth"
+                className="rounded-full bg-white px-8 py-3 text-lg font-semibold text-primary shadow-lg hover:bg-gray-50 transition-all duration-200"
+              >
+                Get Started Free
+                <ArrowRight className="ml-2 inline-block h-5 w-5" />
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-12 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-4 gap-8">
+      <footer className="bg-gray-900 text-white">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             <div>
-              <h3 className="font-bold text-white text-lg mb-4">UpgradeForLess</h3>
-              <p className="text-sm">
-                Transforming SaaS pricing strategies with AI to boost conversions and improve customer satisfaction.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-bold text-white mb-4">Product</h4>
-              <ul className="space-y-2">
-                <li><Link to="/features" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-                <li><a href="#" className="hover:text-white transition-colors">API</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Integrations</a></li>
+              <h3 className="text-sm font-semibold uppercase tracking-wider">Product</h3>
+              <ul className="mt-4 space-y-2">
+                <li><Link to="/features" className="text-gray-400 hover:text-white">Features</Link></li>
+                <li><Link to="/pricing" className="text-gray-400 hover:text-white">Pricing</Link></li>
+                <li><Link to="/docs" className="text-gray-400 hover:text-white">Documentation</Link></li>
               </ul>
             </div>
-            
             <div>
-              <h4 className="font-bold text-white mb-4">Resources</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-                <li><Link to="/support" className="hover:text-white transition-colors">Support</Link></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+              <h3 className="text-sm font-semibold uppercase tracking-wider">Company</h3>
+              <ul className="mt-4 space-y-2">
+                <li><Link to="/about" className="text-gray-400 hover:text-white">About</Link></li>
+                <li><Link to="/blog" className="text-gray-400 hover:text-white">Blog</Link></li>
+                <li><Link to="/careers" className="text-gray-400 hover:text-white">Careers</Link></li>
               </ul>
             </div>
-            
             <div>
-              <h4 className="font-bold text-white mb-4">Company</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms</a></li>
+              <h3 className="text-sm font-semibold uppercase tracking-wider">Support</h3>
+              <ul className="mt-4 space-y-2">
+                <li><Link to="/support" className="text-gray-400 hover:text-white">Help Center</Link></li>
+                <li><Link to="/terms" className="text-gray-400 hover:text-white">Terms of Service</Link></li>
+                <li><Link to="/privacy" className="text-gray-400 hover:text-white">Privacy Policy</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-wider">Connect</h3>
+              <ul className="mt-4 space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white">Twitter</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">LinkedIn</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">GitHub</a></li>
               </ul>
             </div>
           </div>
-          
-          <div className="border-t border-gray-800 mt-12 pt-8 text-sm text-center">
-            <p>&copy; {new Date().getFullYear()} UpgradeForLess. All rights reserved.</p>
+          <div className="mt-12 border-t border-gray-800 pt-8">
+            <p className="text-center text-sm text-gray-400">
+              © {new Date().getFullYear()} UpgradeForLess. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>
     </div>
   );
-};
-
-export default Index;
+}
