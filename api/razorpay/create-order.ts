@@ -1,25 +1,15 @@
-import express from 'express';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Razorpay from 'razorpay';
-
-const router = express.Router();
 
 const key_id = process.env.RAZORPAY_KEY_ID;
 const key_secret = process.env.RAZORPAY_KEY_SECRET;
 
-// Log Razorpay initialization
-console.log('🔐 Initializing Razorpay with key:', key_id);
-
-const razorpay = new Razorpay({
-  key_id: key_id || '',
-  key_secret: key_secret || '',
-});
-
-router.post('/', async (req, res) => {
-  console.log("📝 POST /api/razorpay/create-order");
-  console.log("📥 req.body =", req.body);
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
 
   if (!key_id || !key_secret) {
-    console.error("❌ Razorpay credentials missing");
     return res.status(500).json({ error: "Missing Razorpay credentials" });
   }
 
@@ -27,11 +17,13 @@ router.post('/', async (req, res) => {
     const { amount, planId } = req.body;
 
     if (!amount || typeof amount !== 'number') {
-      console.error('❌ Invalid amount:', amount);
       return res.status(400).json({ error: 'Invalid amount' });
     }
 
-    console.log(`📝 Creating order for planId=${planId}, amount=${amount}`);
+    const razorpay = new Razorpay({
+      key_id,
+      key_secret,
+    });
 
     const order = await razorpay.orders.create({
       amount,
@@ -39,13 +31,8 @@ router.post('/', async (req, res) => {
       receipt: `receipt_${planId}_${Date.now()}`,
     });
 
-    console.log('✅ Order created successfully:', order);
-
     return res.status(200).json(order);
   } catch (err: any) {
-    console.error('❌ Razorpay error:', err.message);
     return res.status(500).json({ error: 'Order creation failed', message: err.message });
   }
-});
-
-export default router; 
+} 
