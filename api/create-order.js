@@ -26,7 +26,7 @@ export default async function handler(req, res) {
   }
 }
 
-// force redeploy to apply correct runtime
+// redeploy attempt without vercel.json
 export default function handler(req, res) {
   res.status(200).json({ message: "Order created successfully!" });
 }
