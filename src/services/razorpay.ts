@@ -20,7 +20,7 @@ export const createOrder = async ({
   try {
     console.log('Creating order for amount:', amount);
     
-    const response = await fetch('/api/razorpay/create-order', {
+    const response = await fetch('https://upgrade-for-less-backend.vercel.app/api/razorpay/create-order', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ export const verifyPayment = async (params: VerifyPaymentParams) => {
   try {
     console.log('Verifying payment:', params);
     
-    const response = await fetch('/api/razorpay/verify-payment', {
+    const response = await fetch('https://upgrade-for-less-backend.vercel.app/api/razorpay/verify-payment', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -292,7 +292,7 @@ export const updatePaymentStatus = async (orderId: string, status: PaymentStatus
 
 export async function initiateRefund(request: RefundRequest): Promise<RefundResponse> {
   try {
-    const response = await fetch('/api/payment/refund', {
+    const response = await fetch('https://upgrade-for-less-backend.vercel.app/api/payment/refund', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
