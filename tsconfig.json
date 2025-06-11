@@ -1,11 +1,15 @@
 {
-  "extends": "./tsconfig.app.json",
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"],
   "compilerOptions": {
-    "declaration": false,
-    "noEmit": false,
-    "emitDeclarationOnly": false,
-    "outDir": "dist"
-  }
+    "target": "ES6",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["api/**/*"]
 }
