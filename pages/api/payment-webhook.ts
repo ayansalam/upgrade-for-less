@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'crypto';
-import { supabase } from '../../integrations/supabase/client';
+import { supabase } from '../../../src/integrations/supabase/client';
 
 // Custom type for Razorpay webhook request with raw body
 interface RazorpayWebhookRequest extends Request {
