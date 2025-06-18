@@ -1,17 +1,19 @@
 {
   "compilerOptions": {
-    "module": "esnext",
-    "target": "esnext",
-
-    "lib": ["DOM", "ESNext"],
-    "esModuleInterop": true,
-    "strict": true,
-    "moduleResolution": "node",
-    "types": ["node"],
-    "baseUrl": "./src",
+    "baseUrl": "src",
     "paths": {
       "@/*": ["*"]
-    }
+    },
+    "moduleResolution": "node",
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["DOM", "ESNext"],
+    "jsx": "react-jsx",
+    "types": ["node"]
   },
-  "include": ["api/**/*"]
+  "include": [
+    "src",
+    "env.d.ts",
+    "vite.config.ts"
+  ]
 }
