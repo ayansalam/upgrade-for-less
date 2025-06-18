@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'crypto';
-import { supabase } from '../../src/integrations/supabase/client';
+import { supabase } from '../../../integrations/supabase/client';
 
 // Custom type for Razorpay webhook request with raw body
 interface RazorpayWebhookRequest extends Request {
@@ -172,4 +172,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   } catch (error) {
     return res.status(500).json({ error: 'Webhook processing failed' });
   }
-} 
+}
