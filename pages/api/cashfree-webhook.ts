@@ -1,6 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { supabase } from '../../src/integrations/supabase/client';
 import { updatePaymentStatus } from '../../src/services/payment';
+import { buffer } from 'micro';
+import crypto from 'crypto';
 
 // Cashfree webhook event types
 type CashfreeWebhookEvent = 'PAYMENT_SUCCESS' | 'PAYMENT_FAILED' | 'REFUND_SUCCESS' | 'REFUND_FAILED';
@@ -31,7 +33,13 @@ interface CashfreeWebhookPayload {
   };
 }
 
-const cashfreeWebhookSecret = process.env.CASHFREE_WEBHOOK_SECRET;
+const cashfreeWebhookSecret = process.env.CASHFREE_CLIENT_SECRET;
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -39,32 +47,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (!cashfreeWebhookSecret) {
-    return res.status(500).json({ error: 'Cashfree webhook secret is missing' });
+    console.error('CASHFREE_CLIENT_SECRET is not set in environment variables.');
+    return res.status(500).json({ error: 'Server configuration error.' });
   }
+
+  const rawBody = (await buffer(req)).toString();
 
   // Cashfree sends the signature in the x-webhook-signature header
   const signature = req.headers['x-webhook-signature'] as string;
   const timestamp = req.headers['x-webhook-timestamp'] as string;
-  const rawBody = JSON.stringify(req.body); // Vercel parses body, so we stringify it back for signature verification
 
   if (!signature || !timestamp || !rawBody) {
     return res.status(400).json({ error: 'Bad request: Missing signature, timestamp, or body' });
   }
 
-  // TODO: Implement Cashfree signature verification
-  // Cashfree signature verification involves HMAC SHA256 with the secret and raw body + timestamp
-  // For now, we'll skip verification for testing purposes.
-  // const expectedSignature = crypto.createHmac('sha256', cashfreeWebhookSecret)
-  //   .update(timestamp + rawBody)
-  //   .digest('base64');
+  const expectedSignature = crypto
+    .createHmac('sha256', cashfreeWebhookSecret)
+    .update(timestamp + rawBody)
+    .digest('base64');
 
-  // if (signature !== expectedSignature) {
-  //   return res.status(401).json({ error: 'Unauthorized: Invalid signature' });
-  // }
+  if (signature !== expectedSignature) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid signature' });
+  }
 
   let payload: CashfreeWebhookPayload;
   try {
-    payload = req.body as CashfreeWebhookPayload;
+    payload = JSON.parse(rawBody) as CashfreeWebhookPayload;
   } catch (err) {
     console.error('Error parsing Cashfree webhook payload:', err);
     return res.status(400).json({ error: 'Bad request: Invalid JSON payload' });
