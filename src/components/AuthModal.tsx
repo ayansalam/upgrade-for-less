@@ -7,14 +7,13 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
-interface AuthModalProps {
+export interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
-  defaultTab?: 'login' | 'signup';
+  children?: React.ReactNode;
 }
 
-export function AuthModal({ isOpen, onClose, onSuccess, defaultTab = 'login' }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, onSuccess, defaultTab = 'login' }: AuthModalProps & { onSuccess?: () => void; defaultTab?: 'login' | 'signup' }) {
   const { signIn, signUp, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>(defaultTab);
   
@@ -118,8 +117,9 @@ export function AuthModal({ isOpen, onClose, onSuccess, defaultTab = 'login' }: 
               {error && <p className="text-sm text-red-500 font-medium">{error}</p>}
               {/* Display login error message from failed login attempt */}
               <div className="text-xs text-amber-600">
-                If you're seeing "Login failed" errors, please make sure you're using the correct credentials.
-                For demo purposes, you can use: demo@example.com / password123
+                // Remove the following lines
+                // If you're seeing "Login failed" errors, please make sure you're using the correct credentials.
+                // For demo purposes, you can use: demo@example.com / password123
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (

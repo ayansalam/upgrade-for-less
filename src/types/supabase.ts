@@ -11,6 +11,35 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          id: string;
+          email: string;
+          first_name?: string;
+          last_name?: string;
+          plan: 'Free' | 'Starter' | 'Pro' | 'LTD';
+          usesThisMonth: number;
+          lastResetDate: string;
+        };
+        Insert: {
+          id: string;
+          email: string;
+          first_name?: string;
+          last_name?: string;
+          plan?: 'Free' | 'Starter' | 'Pro' | 'LTD';
+          usesThisMonth?: number;
+          lastResetDate?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          first_name?: string;
+          last_name?: string;
+          plan?: 'Free' | 'Starter' | 'Pro' | 'LTD';
+          usesThisMonth?: number;
+          lastResetDate?: string;
+        };
+      };
       payments: {
         Row: {
           id: string;

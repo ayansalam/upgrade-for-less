@@ -2,6 +2,9 @@ import './index.css'; // ✅ Tailwind styles applied
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 // import { EnvTest } from '@/components/EnvTest';
+import PricingToolPage from "@/pages/PricingTool";
+import PricingPage from "./pages/PricingPage";
+import PaymentSuccess from "@/pages/PaymentSuccess";
 
 // Page imports
 import Index from "./pages/index";
@@ -31,18 +34,17 @@ function App() {
         {/* Main routes */}
         <Route path="/" element={<Index />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/ai-pricing" element={<PricingToolPage />} />
         <Route path="/features" element={<Features />} />
         <Route path="/support" element={<Support />} />
-        
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
         {/* Auth & Account */}
         <Route path="/auth" element={<Auth />} />
         <Route path="/account-settings" element={<AccountSettings />} />
-        
         {/* Payment routes */}
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/payment-status" element={<PaymentStatus />} />
-        
         {/* Info pages */}
         <Route path="/about" element={<About />} />
         <Route path="/blog" element={<Blog />} />
@@ -50,10 +52,8 @@ function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/careers" element={<Careers />} />
-        
         {/* Admin */}
         <Route path="/admin" element={<Admin />} />
-        
         {/* 404 - Keep this last */}
         <Route path="*" element={<NotFound />} />
       </Routes>

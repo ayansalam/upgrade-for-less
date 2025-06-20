@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/AuthModal";
 import { useToast } from "@/components/ui/use-toast";
+ import { PLAN_LIMITS } from '@/config/planLimits';
+
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -61,7 +63,18 @@ const Dashboard = () => {
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
             {user ? (
-              <p className="text-gray-500">Welcome, {user.email.split('@')[0]}</p>
+              <>
+                <p className="text-gray-500">Welcome, {user.email.split('@')[0]}</p>
+                <div className="mt-2 text-sm text-gray-600">
+                  <p>Your Plan: <span className="font-semibold">{user.plan}</span></p>
+                  {user.plan !== 'Pro' && user.plan !== 'LTD' && (
+                    <p>Usage: <span className="font-semibold">{user.usesThisMonth}</span> of <span className="font-semibold">{PLAN_LIMITS[user.plan]}</span> upgrades used this month.</p>
+                  )}
+                  {(user.plan === 'Free' || user.plan === 'Starter') && user.usesThisMonth >= PLAN_LIMITS[user.plan] && (
+                    <p className="text-red-500 mt-1">You've reached your monthly limit. <Link to="/pricing" className="text-blue-600 hover:underline">Upgrade your plan</Link> for more!</p>
+                  )}
+                </div>
+              </>
             ) : (
               <p className="text-gray-500">Please log in to access your dashboard</p>
             )}
