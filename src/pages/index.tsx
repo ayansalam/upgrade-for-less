@@ -3,6 +3,7 @@ import PricingSection from '@/pages/PricingSection';
 import { motion } from 'framer-motion';
 import { Zap, Shield, CreditCard, ArrowRight, CheckCircle, ChevronRight, BarChart, Lock } from 'lucide-react';
 import { Link } from "react-router-dom";
+import Image from 'next/image'
 
 const features = [
   {
@@ -70,23 +71,23 @@ const workflowSteps = [
   },
   {
     step: "2",
-    title: "Pay with Razorpay",
-    description: "Make secure payments using Razorpay's trusted platform. Your transactions are protected with bank-grade security and encryption.",
-    icon: <Lock className="w-12 h-12 text-primary" />,
+    title: "Pay with Cashfree",
+    description: "Make secure payments using Cashfree's trusted platform. Your transactions are protected with bank-grade security and encryption.",
+    icon: <Lock className="w-12 h-12 text-primary" />, 
     image: "/images/illustrations/secure-payment.svg",
   },
   {
     step: "3",
     title: "Get Instant Access",
     description: "Access your premium tools and upgrades immediately after payment. No waiting period - start optimizing your software costs right away.",
-    icon: <Zap className="w-12 h-12 text-primary" />,
-    image: "https://illustrations.popsy.co/purple/remote-work.svg",
+    icon: <Zap className="w-12 h-12 text-primary" />, 
+    image: "/images/illustrations/instant-access.svg",
   },
   {
     step: "4",
     title: "Grow Smarter",
     description: "Save up to 40% on your software costs while accessing premium features. Scale your business without breaking the bank.",
-    icon: <BarChart className="w-12 h-12 text-primary" />,
+    icon: <BarChart className="w-12 h-12 text-primary" />, 
     image: "/images/illustrations/growth.svg",
   },
 ];
@@ -243,10 +244,13 @@ export default function LandingPage() {
                     <div className="relative lg:pl-12">
                       <div className="relative mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:px-0 lg:max-w-none">
                         <div className="relative pt-64 pb-10 rounded-2xl shadow-xl overflow-hidden">
-                          <img
+                          <Image
                             className="absolute inset-0 h-full w-full object-cover"
                             src={step.image}
                             alt={step.title}
+                            width={400}
+                            height={300}
+                            unoptimized
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-primary/30 to-primary/0 mix-blend-multiply" />
                         </div>
