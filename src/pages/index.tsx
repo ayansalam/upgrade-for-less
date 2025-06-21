@@ -3,7 +3,7 @@ import PricingSection from '@/pages/PricingSection';
 import { motion } from 'framer-motion';
 import { Zap, Shield, CreditCard, ArrowRight, CheckCircle, ChevronRight, BarChart, Lock } from 'lucide-react';
 import { Link } from "react-router-dom";
-import Image from 'next/image'
+// Remove: import Image from 'next/image';
 
 const features = [
   {
