@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import PricingSection from '@/pages/PricingSection';
 import { motion } from 'framer-motion';
 import { Zap, Shield, CreditCard, ArrowRight, CheckCircle, ChevronRight, BarChart, Lock } from 'lucide-react';
